@@ -1,1 +1,70 @@
-<p>home works!</p>
+<header class="topo">
+  <h1>Estética &amp; Bem-Estar</h1>
+  <nav class="topo-links">
+    <a routerLink="/cadastro">Cadastre-se</a>
+    <a routerLink="/pedidos">Meus pedidos</a>
+    <a routerLink="/carrinho" class="link-carrinho">
+      Carrinho ({{ carrinho.quantidadeTotal() }})
+    </a>
+
+    <ul>
+        <li>
+            <a routerLink="/cadastro" >Cadastro</a>
+        </li>
+    </ul>
+    
+  </nav>
+</header>
+
+<main class="catalogo">
+  <div class="filtros">
+    <input
+      type="search"
+      placeholder="Buscar por nome"
+      aria-label="Buscar por nome"
+      [ngModel]="busca()"
+      (ngModelChange)="busca.set($event)">
+
+    <ul class="categorias" aria-label="Categorias">
+      <li>
+        <button type="button"
+                [class.ativa]="categoriaSelecionada() === null"
+                (click)="selecionarCategoria(null)">Todas</button>
+      </li>
+      @for (c of categorias(); track c.idcategoria) {
+        <li>
+          <button type="button"
+                  [class.ativa]="categoriaSelecionada() === c.idcategoria"
+                  (click)="selecionarCategoria(c.idcategoria)">{{ c.categoria }}</button>
+        </li>
+      }
+    </ul>
+  </div>
+
+  @if (aviso()) {
+    <p class="aviso" role="status">{{ aviso() }}</p>
+  }
+
+  @if (carregando()) {
+    <p class="mensagem">Carregando catálogo...</p>
+  } @else if (erro()) {
+    <p class="mensagem erro">{{ erro() }}</p>
+  } @else if (itensFiltrados().length === 0) {
+    <p class="mensagem">Nenhum item encontrado. Tente outra busca ou categoria.</p>
+  } @else {
+    <section class="grade">
+      @for (i of itensFiltrados(); track i.idItem) {
+        <article class="cartao" [class.indisponivel]="!disponivel(i)">
+          <p class="cartao-categoria">{{ i.categoria }} · {{ i.tipoItem === 'S' ? 'Serviço' : 'Produto' }}</p>
+          <h2>{{ i.item }}</h2>
+          <p class="descricao">{{ i.descricaoItem }}</p>
+          <p class="preco">{{ i.preco | currency:'BRL' }}</p>
+          <p class="disponibilidade">{{ textoDisponibilidade(i) }}</p>
+          <button type="button"
+                  [disabled]="!disponivel(i)"
+                  (click)="adicionar(i)">Adicionar ao carrinho</button>
+        </article>
+      }
+    </section>
+  }
+</main>
