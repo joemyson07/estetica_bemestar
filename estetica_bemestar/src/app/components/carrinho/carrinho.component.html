@@ -1,1 +1,67 @@
-<p>carrinho works!</p>
+<div class="carrinho-container">
+    <h2>🛒 Carrinho de Compras</h2>
+  
+    <div *ngIf="exibirMensagem" [class]="tipoMensagem === 'sucesso' ? 'alerta sucesso' : 'alerta erro'">
+      {{ mensagem }}
+    </div>
+  
+    <div *ngIf="itens.length === 0" class="carrinho-vazio">
+      <p>Seu carrinho está vazio.</p>
+      <button class="btn btn-primary" (click)="voltarCatalogo()">Voltar ao Catálogo</button>
+    </div>
+  
+    <div *ngIf="itens.length > 0">
+      <table class="tabela-carrinho">
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th>Tipo</th>
+            <th>Preço Unit.</th>
+            <th>Quantidade</th>
+            <th>Total</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of itens">
+            <td>{{ item.item.nome }}</td>
+            <td>
+              <span [class]="item.item.tipo === 'Produto' ? 'badge-produto' : 'badge-servico'">
+                {{ item.item.tipo === 'Produto' ? ' Produto' : '💇 Serviço' }}
+              </span>
+            </td>
+            <td>R$ {{ item.valorUnitario | number:'1.2-2' }}</td>
+            <td>
+              <div class="controle-quantidade">
+                <button (click)="alterarQuantidade(item, item.quantidade - 1)" class="btn-qtd">-</button>
+                <input
+                  type="number"
+                  [value]="item.quantidade"
+                  (change)="alterarQuantidade(item, $any($event.target).value)"
+                  min="1"
+                  class="input-qtd"
+                >
+                <button (click)="alterarQuantidade(item, item.quantidade + 1)" class="btn-qtd">+</button>
+              </div>
+            </td>
+            <td class="valor-total">R$ {{ item.valorTotal | number:'1.2-2' }}</td>
+            <td>
+              <button class="btn btn-remover" (click)="removerItem(item.item.idItem!)">️ Remover</button>
+            </td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="4" class="total-label"><strong>TOTAL:</strong></td>
+            <td class="total-valor"><strong>R$ {{ valorTotal | number:'1.2-2' }}</strong></td>
+            <td></td>
+          </tr>
+        </tfoot>
+      </table>
+  
+      <div class="acoes-carrinho">
+        <button class="btn btn-secondary" (click)="voltarCatalogo()">Continuar Comprando</button>
+        <button class="btn btn-confirmar" (click)="confirmarPedido()">✅ Confirmar Pedido</button>
+      </div>
+    </div>
+  </div>

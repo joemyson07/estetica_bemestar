@@ -1,1 +1,13 @@
+<nav class="navbar">
+    <div class="logo">Estética & Bem-Estar</div>
+    <ul class="menu">
+      <li><a routerLink="/home" routerLinkActive="ativo">Catálogo</a></li>
+      <li><a routerLink="/cadastro" routerLinkActive="ativo">Cadastro</a></li>
+      <li><a routerLink="/carrinho" routerLinkActive="ativo">
+        Carrinho ({{ quantidadeCarrinho }})
+      </a></li>
+      <li><a routerLink="/meus-pedidos" routerLinkActive="ativo">Meus Pedidos</a></li>
+    </ul>
+  </nav>
+  
 <router-outlet></router-outlet>

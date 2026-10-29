@@ -9,11 +9,11 @@ export interface Endereco {
   export interface Pessoa {
     idpessoa?: number;
     nome: string;
-    cpf: number;
+    cpf: string;
     data_nascimento: string;
     sexo: string;
     email: string;
-    telefone: number;
+    telefone: string;
     ativo_pessoa?: string;
     endereco?: Endereco;
   }

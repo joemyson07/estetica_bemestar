@@ -23,7 +23,7 @@ export class HomeComponent {
   itens = signal<Item[]>([]);
   categorias = signal<Categoria[]>([]);
   busca = signal('');
-  categoriaSelecionada = signal<number | null>(null); // null = todas
+  categoriaSelecionada = signal<number | null>(null); 
   carregando = signal(true);
   erro = signal('');
   aviso = signal('');
@@ -72,7 +72,7 @@ export class HomeComponent {
   }
 
   adicionar(item: Item): void {
-    const ok = this.carrinho.adicionar(item);
+    const ok = this.carrinho.adicionarItem(item);
     this.aviso.set(
       ok ? `${item.item} adicionado ao carrinho.`
          : `Quantidade máxima em estoque de ${item.item} já está no carrinho.`

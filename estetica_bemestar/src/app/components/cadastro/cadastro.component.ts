@@ -1,6 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormsModule, NgForm } from '@angular/forms';
 import { Router } from '@angular/router';
 import { PessoaService } from '../../services/pessoas/pessoas.service';
 import { Pessoa } from '../../models/pessoa';
@@ -8,62 +7,67 @@ import { Pessoa } from '../../models/pessoa';
 @Component({
   selector: 'app-cadastro',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [FormsModule],
   templateUrl: './cadastro.component.html',
   styleUrl: './cadastro.component.css'
 })
 export class CadastroComponent {
-  private fb = inject(FormBuilder);
   private pessoaService = inject(PessoaService);
   private router = inject(Router);
 
-  formCadastro: FormGroup = this.fb.group({
-    nome: ['', [Validators.required]],
-    cpf: ['', [Validators.required, Validators.pattern(/^\d{11}$/)]],
-    data_nascimento: ['', [Validators.required]],
-    sexo: ['', [Validators.required]],
-    email: ['', [Validators.required, Validators.email]],
-    telefone: ['', [Validators.required]],
-    cep: ['', [Validators.required]],
-    numero: ['', [Validators.required]],
-    complemento: ['']
-  });
+  nome = '';
+  cpf = '';
+  dataNascimento = '';
+  sexo = '';
+  email = '';
+  telefone = '';
+  cep = '';
+  numero = '';
+  complemento = '';
 
-  salvar(): void {
-    if (this.formCadastro.invalid) {
-      this.formCadastro.markAllAsTouched();
+  enviando = false;
+
+  salvar(form: NgForm): void {
+    if (form.invalid) {
+      form.control.markAllAsTouched();
       alert('Preencha todos os campos obrigatórios corretamente.');
       return;
     }
 
-    const dados = this.formCadastro.value;
+    if (this.enviando) return;
+    this.enviando = true;
 
-    const novaPessoa: Pessoa = {
-      nome: dados.nome,
-      cpf: Number(dados.cpf),
-      data_nascimento: dados.data_nascimento,
-      sexo: dados.sexo,
-      email: dados.email,
-      telefone: Number(dados.telefone),
+    const pessoa: Pessoa = {
+      nome: this.nome,
+      cpf: this.cpf,
+      data_nascimento: this.dataNascimento,
+      sexo: this.sexo,
+      email: this.email,
+      telefone: this.telefone,
       ativo_pessoa: 'S',
       endereco: {
-        cep: dados.cep,
-        numero: dados.numero,
-        complemento: dados.complemento
+        cep: this.cep,
+        numero: this.numero,
+        complemento: this.complemento
       }
     };
 
-    this.pessoaService.cadastrar(novaPessoa).subscribe({
+    this.pessoaService.cadastrar(pessoa).subscribe({
       next: () => {
         alert('Cadastro efetuado com sucesso!');
-        this.limpar();
+        this.limpar(form);
+        this.enviando = false;
       },
-      error: () => alert('Erro ao cadastrar. Verifique se o CPF ou E-mail já estão cadastrados.')
+      error: (msgErro) => {
+        console.log('ERRO AO CADASTRAR', msgErro);
+        alert('Erro ao cadastrar. Verifique se o CPF ou E-mail já estão cadastrados.');
+        this.enviando = false;
+      }
     });
   }
 
-  limpar(): void {
-    this.formCadastro.reset();
+  limpar(form: NgForm): void {
+    form.resetForm();
   }
 
   voltarAoCatalogo(): void {

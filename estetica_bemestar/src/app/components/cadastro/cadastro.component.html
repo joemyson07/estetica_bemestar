@@ -1,72 +1,102 @@
 <div class="container-cadastro">
-    <h2>Cadastro de Cliente</h2>
-  
-    <form [formGroup]="formCadastro" (ngSubmit)="salvar()">
-      
-      <fieldset>
-        <legend>Informações Pessoais</legend>
-        
-        <div>
-          <label>Nome Completo:</label>
-          <input type="text" formControlName="nome">
-        </div>
-  
-        <div>
-          <label>CPF (somente números):</label>
-          <input type="text" formControlName="cpf" maxlength="11">
-        </div>
-  
-        <div>
-          <label>Data de Nascimento:</label>
-          <input type="date" formControlName="data_nascimento">
-        </div>
-  
-        <div>
-          <label>Sexo:</label>
-          <select formControlName="sexo">
-            <option value="">Selecione</option>
-            <option value="M">Masculino</option>
-            <option value="F">Feminino</option>
-          </select>
-        </div>
-  
-        <div>
-          <label>E-mail:</label>
-          <input type="email" formControlName="email">
-        </div>
-  
-        <div>
-          <label>Telefone:</label>
-          <input type="text" formControlName="telefone">
-        </div>
-      </fieldset>
-  
-      <!-- Dados do Endereço -->
-      <fieldset>
-        <legend>Endereço</legend>
-  
-        <div>
-          <label>CEP:</label>
-          <input type="text" formControlName="cep" maxlength="8">
-        </div>
-  
-        <div>
-          <label>Número:</label>
-          <input type="text" formControlName="numero">
-        </div>
-  
-        <div>
-          <label>Complemento:</label>
-          <input type="text" formControlName="complemento">
-        </div>
-      </fieldset>
-  
-      <!-- Ações Principais -->
-      <div class="acoes">
-        <button type="submit">Salvar</button>
-        <button type="button" (click)="limpar()">Limpar</button>
-        <button type="button" (click)="voltarAoCatalogo()">Voltar ao Catálogo</button>
+  <h2>Cadastro de Cliente</h2>
+
+  <form #formCadastro="ngForm" (ngSubmit)="salvar(formCadastro)">
+
+    <fieldset>
+      <legend>Informações Pessoais</legend>
+
+      <div>
+        <label>Nome Completo:</label>
+        <input type="text" name="nome" [(ngModel)]="nome" #campoNome="ngModel"
+               required maxlength="100">
+        @if (campoNome.invalid && (campoNome.touched || formCadastro.submitted)) {
+          <small class="invalido">Confira este campo.</small>
+        }
       </div>
-  
-    </form>
-  </div>
+
+      <div>
+        <label>CPF (somente números):</label>
+        <input type="text" name="cpf" [(ngModel)]="cpf" #campoCpf="ngModel"
+               required maxlength="11" pattern="[0-9]{11}">
+        @if (campoCpf.invalid && (campoCpf.touched || formCadastro.submitted)) {
+          <small class="invalido">Informe os 11 dígitos do CPF.</small>
+        }
+      </div>
+
+      <div>
+        <label>Data de Nascimento:</label>
+        <input type="date" name="dataNascimento" [(ngModel)]="dataNascimento"
+               #campoNascimento="ngModel" required>
+        @if (campoNascimento.invalid && (campoNascimento.touched || formCadastro.submitted)) {
+          <small class="invalido">Confira este campo.</small>
+        }
+      </div>
+
+      <div>
+        <label>Sexo:</label>
+        <select name="sexo" [(ngModel)]="sexo" #campoSexo="ngModel" required>
+          <option value="">Selecione</option>
+          <option value="F">Feminino</option>
+          <option value="M">Masculino</option>
+          <option value="O">Outro</option>
+        </select>
+        @if (campoSexo.invalid && (campoSexo.touched || formCadastro.submitted)) {
+          <small class="invalido">Selecione uma opção.</small>
+        }
+      </div>
+
+      <div>
+        <label>E-mail:</label>
+        <input type="email" name="email" [(ngModel)]="email" #campoEmail="ngModel"
+               required email maxlength="100">
+        @if (campoEmail.invalid && (campoEmail.touched || formCadastro.submitted)) {
+          <small class="invalido">Informe um e-mail válido.</small>
+        }
+      </div>
+
+      <div>
+        <label>Telefone com DDD:</label>
+        <input type="text" name="telefone" [(ngModel)]="telefone" #campoTelefone="ngModel"
+               required maxlength="11" pattern="[0-9]{10,11}">
+        @if (campoTelefone.invalid && (campoTelefone.touched || formCadastro.submitted)) {
+          <small class="invalido">Informe o telefone com DDD, somente números.</small>
+        }
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Endereço</legend>
+
+      <div>
+        <label>CEP (8 dígitos):</label>
+        <input type="text" name="cep" [(ngModel)]="cep" #campoCep="ngModel"
+               required maxlength="8" pattern="[0-9]{8}">
+        @if (campoCep.invalid && (campoCep.touched || formCadastro.submitted)) {
+          <small class="invalido">Informe os 8 dígitos do CEP.</small>
+        }
+      </div>
+
+      <div>
+        <label>Número:</label>
+        <input type="text" name="numero" [(ngModel)]="numero" #campoNumero="ngModel"
+               required maxlength="10">
+        @if (campoNumero.invalid && (campoNumero.touched || formCadastro.submitted)) {
+          <small class="invalido">Confira este campo.</small>
+        }
+      </div>
+
+      <div>
+        <label>Complemento:</label>
+        <input type="text" name="complemento" [(ngModel)]="complemento" maxlength="150">
+      </div>
+    </fieldset>
+
+    <div class="acoes">
+      <button type="submit" [disabled]="enviando">Salvar</button>
+      <button type="button" (click)="limpar(formCadastro)">Limpar</button>
+      <button type="button" (click)="voltarAoCatalogo()">Voltar ao Catálogo</button>
+    </div>
+
+  </form>
+</div>

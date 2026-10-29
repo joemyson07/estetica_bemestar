@@ -1,68 +1,101 @@
-import { Injectable, computed, signal } from '@angular/core';
-import { Item } from '../../models/item';
+import { Injectable } from '@angular/core';
+import { Item } from '../../models/item'; // Ajuste o caminho se seu model estiver em outro lugar
+import { BehaviorSubject } from 'rxjs';
 
 export interface ItemCarrinho {
   item: Item;
   quantidade: number;
+  valorUnitario: number;
+  valorTotal: number;
 }
 
-@Injectable({ providedIn: 'root' })
+@Injectable({
+  providedIn: 'root'
+})
 export class CarrinhoService {
-  private _itens = signal<ItemCarrinho[]>([]);
+  private itens: ItemCarrinho[] = [];
+  private itensSubject = new BehaviorSubject<ItemCarrinho[]>([]);
+  itens$ = this.itensSubject.asObservable();
 
-  readonly itens = this._itens.asReadonly();
-  readonly quantidadeTotal = computed(() =>
-    this._itens().reduce((soma, i) => soma + i.quantidade, 0)
-  );
-  readonly total = computed(() =>
-    this._itens().reduce((soma, i) => soma + i.item.preco * i.quantidade, 0)
-  );
+  constructor() {}
 
-  // Retorna false se não puder adicionar (limite de estoque de produto)
-  adicionar(item: Item): boolean {
-    const atual = this._itens().find(i => i.item.idItem === item.idItem);
-
-    if (atual) {
-      if (!this.podeAumentar(atual)) return false;
-      this._itens.update(lista =>
-        lista.map(i => i.item.idItem === item.idItem
-          ? { ...i, quantidade: i.quantidade + 1 }
-          : i)
-      );
-      return true;
+  adicionarItem(item: Item, quantidade: number = 1): string | null {
+    // Validação de estoque para produtos (tipoItem === 'P')
+    if (item.tipoItem === 'P') {
+      const estoque = item.quantidadeEstoque ?? 0;
+      if (quantidade > estoque) {
+        return `Estoque insuficiente. Disponível: ${estoque}`;
+      }
+      if (estoque === 0) {
+        return 'Produto indisponível no estoque.';
+      }
     }
 
-    this._itens.update(lista => [...lista, { item, quantidade: 1 }]);
-    return true;
+    const existente = this.itens.find(i => i.item.idItem === item.idItem);
+    if (existente) {
+      const novaQtd = existente.quantidade + quantidade;
+      const estoque = item.quantidadeEstoque ?? 0;
+      
+      if (item.tipoItem === 'P' && novaQtd > estoque) {
+        return `Quantidade máxima em estoque: ${estoque}`;
+      }
+      existente.quantidade = novaQtd;
+      existente.valorTotal = existente.quantidade * existente.valorUnitario;
+    } else {
+      this.itens.push({
+        item,
+        quantidade,
+        valorUnitario: item.preco,
+        valorTotal: quantidade * item.preco
+      });
+    }
+    this.atualizarSubject();
+    return null;
   }
 
-  alterarQuantidade(idItem: number, quantidade: number): void {
-    const atual = this._itens().find(i => i.item.idItem === idItem);
-    if (!atual) return;
+  alterarQuantidade(idItem: number, quantidade: number): string | null {
+    const itemCarrinho = this.itens.find(i => i.item.idItem === idItem);
+    if (!itemCarrinho) return 'Item não encontrado no carrinho.';
 
     if (quantidade <= 0) {
-      this.remover(idItem);
-      return;
+      this.removerItem(idItem);
+      return null;
     }
-    // serviço não tem estoque; produto respeita o estoque
-    const limite = atual.item.tipoItem === 'P' ? atual.item.quantidadeEstoque ?? 0 : Infinity;
-    const nova = Math.min(quantidade, limite);
 
-    this._itens.update(lista =>
-      lista.map(i => i.item.idItem === idItem ? { ...i, quantidade: nova } : i)
-    );
+    const estoque = itemCarrinho.item.quantidadeEstoque ?? 0;
+    if (itemCarrinho.item.tipoItem === 'P' && quantidade > estoque) {
+      return `Estoque insuficiente. Máximo: ${estoque}`;
+    }
+
+    itemCarrinho.quantidade = quantidade;
+    itemCarrinho.valorTotal = quantidade * itemCarrinho.valorUnitario;
+    this.atualizarSubject();
+    return null;
   }
 
-  remover(idItem: number): void {
-    this._itens.update(lista => lista.filter(i => i.item.idItem !== idItem));
+  removerItem(idItem: number): void {
+    this.itens = this.itens.filter(i => i.item.idItem !== idItem);
+    this.atualizarSubject();
   }
 
-  limpar(): void {
-    this._itens.set([]);
+  limparCarrinho(): void {
+    this.itens = [];
+    this.atualizarSubject();
   }
 
-  private podeAumentar(i: ItemCarrinho): boolean {
-    if (i.item.tipoItem === 'S') return true;
-    return i.quantidade < (i.item.quantidadeEstoque ?? 0);
+  getItens(): ItemCarrinho[] {
+    return this.itens;
+  }
+
+  getValorTotal(): number {
+    return this.itens.reduce((total, item) => total + item.valorTotal, 0);
+  }
+
+  getQuantidadeTotal(): number {
+    return this.itens.reduce((total, item) => total + item.quantidade, 0);
+  }
+
+  private atualizarSubject(): void {
+    this.itensSubject.next([...this.itens]);
   }
 }
