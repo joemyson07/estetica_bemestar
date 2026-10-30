@@ -1,10 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { CommonModule, DecimalPipe, DatePipe } from '@angular/common';
 import { PedidoService } from '../../services/pedido/pedido.service';
 import { Pedido } from '../../models/pedido';
 
 @Component({
   selector: 'app-pedidos',
+  standalone: true,
+  imports: [CommonModule, DecimalPipe, DatePipe],
   templateUrl: './pedidos.component.html',
   styleUrls: ['./pedidos.component.css']
 })

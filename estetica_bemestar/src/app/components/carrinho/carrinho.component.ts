@@ -1,5 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
+import { CommonModule, DecimalPipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { CarrinhoService, ItemCarrinho } from '../../services/carrinho/carrinho.service';
 import { PedidoService } from '../../services/pedido/pedido.service';
 import { Pedido, ItemPedido } from '../../models/pedido';
@@ -7,6 +9,8 @@ import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-carrinho',
+  standalone: true,
+  imports: [CommonModule, FormsModule, DecimalPipe],
   templateUrl: './carrinho.component.html',
   styleUrls: ['./carrinho.component.css']
 })
@@ -71,7 +75,6 @@ export class CarrinhoComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // Validação final de estoque no frontend antes de enviar
     for (const itemCarrinho of this.itens) {
       if (itemCarrinho.item.tipoItem === 'P') {
         const estoque = itemCarrinho.item.quantidadeEstoque ?? 0;
@@ -82,10 +85,9 @@ export class CarrinhoComponent implements OnInit, OnDestroy {
       }
     }
 
-    // Mapeia os itens do carrinho para o formato ItemPedido esperado pela API
     const itensPedido: ItemPedido[] = this.itens.map(i => ({
       idItem: i.item.idItem,
-      nomeItem: i.item.item, // A propriedade 'item' no seu model Item contém o nome
+      nomeItem: i.item.item,
       tipoItem: i.item.tipoItem,
       quantidade: i.quantidade,
       valorUnitario: i.valorUnitario,
@@ -93,7 +95,6 @@ export class CarrinhoComponent implements OnInit, OnDestroy {
       estoqueDisponivel: i.item.quantidadeEstoque ?? undefined
     }));
 
-    // Monta o objeto Pedido final
     const pedido: Pedido = {
       idPessoa: this.idCliente,
       dataPedido: new Date().toISOString(),
@@ -102,10 +103,9 @@ export class CarrinhoComponent implements OnInit, OnDestroy {
       itens: itensPedido
     };
 
-    // Envia para a API
     this.pedidoService.cadastrarPedido(pedido).subscribe({
       next: (pedidoCriado: any) => {
-        const id = pedidoCriado.idPedido || pedidoCriado.idAtendimento; // Fallback caso a API retorne com nome diferente
+        const id = pedidoCriado.idPedido || pedidoCriado.idAtendimento;
         this.exibirMensagemSucesso(`Pedido #${id} registrado com sucesso!`);
         this.carrinhoService.limparCarrinho();
         setTimeout(() => {

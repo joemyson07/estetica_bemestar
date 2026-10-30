@@ -1,57 +1,58 @@
 <div class="pedidos-container">
-    <h2>📋 Meus Pedidos</h2>
-  
-    <div *ngIf="exibirMensagem" [class]="tipoMensagem === 'sucesso' ? 'alerta sucesso' : 'alerta erro'">
-      {{ mensagem }}
-    </div>
-  
-    <div *ngIf="carregando" class="carregando">
-      <p>Carregando pedidos...</p>
-    </div>
-  
-    <div *ngIf="!carregando && pedidos.length === 0" class="sem-pedidos">
-      <p>Você ainda não possui pedidos.</p>
-      <button class="btn btn-primary" (click)="voltarCatalogo()">Ir ao Catálogo</button>
-    </div>
-  
-    <div *ngIf="!carregando && pedidos.length > 0" class="lista-pedidos">
-      <div *ngFor="let pedido of pedidos" class="pedido-card">
-        <div class="pedido-header" (click)="selecionarPedido(pedido)">
-          <div class="pedido-info">
-            <span class="pedido-numero">Pedido #{{ pedido.idPedido }}</span>
-            <span class="pedido-data">{{ pedido.dataPedido | date:'dd/MM/yyyy HH:mm' }}</span>
-            <span [class]="'status-badge ' + getStatusClass(pedido.status || '')">
-              {{ pedido.status }}
-            </span>
-          </div>
-          <div class="pedido-valor">
-            <strong>R$ {{ pedido.valorTotal | number:'1.2-2' }}</strong>
-          </div>
+  <h2>📋 Meus Pedidos</h2>
+
+  <div *ngIf="exibirMensagem" [class]="tipoMensagem === 'sucesso' ? 'alerta sucesso' : 'alerta erro'">
+    {{ mensagem }}
+  </div>
+
+  <div *ngIf="carregando" class="carregando">
+    <p>Carregando pedidos...</p>
+  </div>
+
+  <div *ngIf="!carregando && pedidos.length === 0" class="sem-pedidos">
+    <p>Você ainda não possui pedidos.</p>
+    <button class="btn btn-primary" (click)="voltarCatalogo()">Ir ao Catálogo</button>
+  </div>
+
+  <div *ngIf="!carregando && pedidos.length > 0" class="lista-pedidos">
+    <div *ngFor="let pedido of pedidos" class="pedido-card">
+      <div class="pedido-header" (click)="selecionarPedido(pedido)">
+        <div class="pedido-info">
+          <span class="pedido-numero">Pedido #{{ pedido.idPedido }}</span>
+          <span class="pedido-data">{{ pedido.dataPedido | date:'dd/MM/yyyy HH:mm' }}</span>
+          <span [class]="'status-badge ' + getStatusClass(pedido.status || '')">
+            {{ pedido.status }}
+          </span>
         </div>
-  
-        <div *ngIf="pedidoSelecionado?.idPedido === pedido.idPedido" class="pedido-detalhes">
-          <h4>Itens do Pedido:</h4>
-          <table class="tabela-itens">
-            <thead>
-              <tr>
-                <th>Item</th>
-                <th>Tipo</th>
-                <th>Qtd</th>
-                <th>Valor Unit.</th>
-                <th>Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let item of pedido.itens">
-                <td>{{ item.nomeItem }}</td>
-                <td>{{ item.tipo === 'Produto' ? '📦' : '' }} {{ item.tipo }}</td>
-                <td>{{ item.quantidade }}</td>
-                <td>R$ {{ item.valorUnitario | number:'1.2-2' }}</td>
-                <td>R$ {{ item.valorTotal | number:'1.2-2' }}</td>
-              </tr>
-            </tbody>
-          </table>
+        <div class="pedido-valor">
+          <strong>R$ {{ pedido.valorTotal | number:'1.2-2' }}</strong>
         </div>
+      </div>
+
+      <div *ngIf="pedidoSelecionado?.idPedido === pedido.idPedido" class="pedido-detalhes">
+        <h4>Itens do Pedido:</h4>
+        <table class="tabela-itens">
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th>Tipo</th>
+              <th>Qtd</th>
+              <th>Valor Unit.</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of pedido.itens">
+              <td>{{ item.nomeItem }}</td>
+              <!-- ✅ CORRIGIDO: tipoItem em vez de tipo -->
+              <td>{{ item.tipoItem === 'P' ? '📦' : '💇' }} {{ item.tipoItem === 'P' ? 'Produto' : 'Serviço' }}</td>
+              <td>{{ item.quantidade }}</td>
+              <td>R$ {{ item.valorUnitario | number:'1.2-2' }}</td>
+              <td>R$ {{ item.valorTotal | number:'1.2-2' }}</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
+</div><object data="" type=""></object>
