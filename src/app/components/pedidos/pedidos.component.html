@@ -1,5 +1,5 @@
 <div class="pedidos-container">
-  <h2>📋 Meus Pedidos</h2>
+  <h2> Meus Pedidos</h2>
 
   <div *ngIf="exibirMensagem" [class]="tipoMensagem === 'sucesso' ? 'alerta sucesso' : 'alerta erro'">
     {{ mensagem }}
@@ -45,7 +45,7 @@
             <tr *ngFor="let item of pedido.itens">
               <td>{{ item.nomeItem }}</td>
               <!-- ✅ CORRIGIDO: tipoItem em vez de tipo -->
-              <td>{{ item.tipoItem === 'P' ? '📦' : '💇' }} {{ item.tipoItem === 'P' ? 'Produto' : 'Serviço' }}</td>
+              <td>{{ item.tipoItem === 'P' ? '' : '' }} {{ item.tipoItem === 'P' ? 'Produto' : 'Serviço' }}</td>
               <td>{{ item.quantidade }}</td>
               <td>R$ {{ item.valorUnitario | number:'1.2-2' }}</td>
               <td>R$ {{ item.valorTotal | number:'1.2-2' }}</td>

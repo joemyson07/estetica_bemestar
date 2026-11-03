@@ -29,7 +29,7 @@
           <td>
             <!-- ✅ CORRIGIDO: tipoItem em vez de tipo -->
             <span [class]="item.item.tipoItem === 'P' ? 'badge-produto' : 'badge-servico'">
-              {{ item.item.tipoItem === 'P' ? '📦 Produto' : '💇 Serviço' }}
+              {{ item.item.tipoItem === 'P' ? ' Produto' : ' Serviço' }}
             </span>
           </td>
           <td>R$ {{ item.valorUnitario | number:'1.2-2' }}</td>
