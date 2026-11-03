@@ -1,58 +1,94 @@
 <div class="pedidos-container">
-  <h2> Meus Pedidos</h2>
+  <header class="pedidos-header">
+    <h1>Meus Pedidos</h1>
+    <p *ngIf="clienteIdentificado" class="saudacao">Olá, {{ nomeCliente }}!</p>
+  </header>
 
-  <div *ngIf="exibirMensagem" [class]="tipoMensagem === 'sucesso' ? 'alerta sucesso' : 'alerta erro'">
-    {{ mensagem }}
+  <!-- Tela de identificação (quando cliente não está logado) -->
+  <div *ngIf="!clienteIdentificado && !carregando" class="identificacao">
+    <h2>Identifique-se para ver seus pedidos</h2>
+    <p>Informe o email e CPF usados no cadastro:</p>
+
+    <div *ngIf="erroIdentificacao" class="alerta erro">{{ erroIdentificacao }}</div>
+
+    <form (ngSubmit)="identificarCliente()" class="form-identificacao">
+      <label>Email:</label>
+      <input type="email" [(ngModel)]="emailIdentificacao" name="email" required placeholder="seu@email.com" />
+
+      <label>CPF (apenas números):</label>
+      <input type="text" [(ngModel)]="cpfIdentificacao" name="cpf" required placeholder="00000000000" maxlength="11" />
+
+      <button type="submit" class="btn-primary">Entrar</button>
+    </form>
+
+    <button class="btn-secundario" (click)="voltarCatalogo()">Voltar ao Catálogo</button>
   </div>
 
-  <div *ngIf="carregando" class="carregando">
-    <p>Carregando pedidos...</p>
-  </div>
+  <!-- Conteúdo principal (quando cliente identificado) -->
+  <div *ngIf="clienteIdentificado">
+    <button (click)="sairConta()" class="btn-sair">Sair da conta</button>
 
-  <div *ngIf="!carregando && pedidos.length === 0" class="sem-pedidos">
-    <p>Você ainda não possui pedidos.</p>
-    <button class="btn btn-primary" (click)="voltarCatalogo()">Ir ao Catálogo</button>
-  </div>
+    <!-- Estados -->
+    <div *ngIf="carregando" class="alerta info">Carregando pedidos...</div>
+    <div *ngIf="erro" class="alerta erro">{{ erro }}</div>
 
-  <div *ngIf="!carregando && pedidos.length > 0" class="lista-pedidos">
-    <div *ngFor="let pedido of pedidos" class="pedido-card">
-      <div class="pedido-header" (click)="selecionarPedido(pedido)">
+    <!-- Lista de pedidos -->
+    <div *ngIf="!carregando && !pedidoSelecionado">
+      <div *ngIf="pedidos.length === 0" class="alerta info">
+        Você ainda não tem pedidos registrados.
+        <br />
+        <button class="btn-primary" (click)="voltarCatalogo()" style="margin-top: 12px;">Ir ao Catálogo</button>
+      </div>
+
+      <div *ngFor="let pedido of pedidos" class="card-pedido" (click)="selecionarPedido(pedido)">
         <div class="pedido-info">
-          <span class="pedido-numero">Pedido #{{ pedido.idPedido }}</span>
-          <span class="pedido-data">{{ pedido.dataPedido | date:'dd/MM/yyyy HH:mm' }}</span>
-          <span [class]="'status-badge ' + getStatusClass(pedido.status || '')">
+          <span class="numero">Pedido #{{ pedido.idPedido }}</span>
+          <span class="data">{{ pedido.dataPedido | date:'dd/MM/yyyy' }}</span>
+          <span class="status-badge" [class]="'status-badge ' + getStatusClass(pedido.status || '')">
             {{ pedido.status }}
           </span>
         </div>
-        <div class="pedido-valor">
-          <strong>R$ {{ pedido.valorTotal | number:'1.2-2' }}</strong>
+        <div class="pedido-resumo">
+          <span>{{ pedido.itens?.length || 0 }} itens</span>
+          <span class="valor">R$ {{ pedido.valorTotal?.toFixed(2) }}</span>
         </div>
       </div>
+    </div>
 
-      <div *ngIf="pedidoSelecionado?.idPedido === pedido.idPedido" class="pedido-detalhes">
-        <h4>Itens do Pedido:</h4>
-        <table class="tabela-itens">
-          <thead>
-            <tr>
-              <th>Item</th>
-              <th>Tipo</th>
-              <th>Qtd</th>
-              <th>Valor Unit.</th>
-              <th>Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let item of pedido.itens">
-              <td>{{ item.nomeItem }}</td>
-              <!-- ✅ CORRIGIDO: tipoItem em vez de tipo -->
-              <td>{{ item.tipoItem === 'P' ? '' : '' }} {{ item.tipoItem === 'P' ? 'Produto' : 'Serviço' }}</td>
-              <td>{{ item.quantidade }}</td>
-              <td>R$ {{ item.valorUnitario | number:'1.2-2' }}</td>
-              <td>R$ {{ item.valorTotal | number:'1.2-2' }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+    <!-- Detalhes do pedido selecionado -->
+    <div *ngIf="pedidoSelecionado" class="detalhes">
+      <button (click)="voltarParaLista()" class="btn-secundario">← Voltar</button>
+      
+      <h2>Pedido #{{ pedidoSelecionado.idPedido }}</h2>
+      <p><strong>Data:</strong> {{ pedidoSelecionado.dataPedido | date:'dd/MM/yyyy HH:mm' }}</p>
+      <p><strong>Status:</strong> 
+        <span class="status-badge" [class]="'status-badge ' + getStatusClass(pedidoSelecionado.status || '')">
+          {{ pedidoSelecionado.status }}
+        </span>
+      </p>
+      <p><strong>Total:</strong> R$ {{ pedidoSelecionado.valorTotal?.toFixed(2) }}</p>
+
+      <h3>Itens do pedido:</h3>
+      <table class="tabela-itens">
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th>Tipo</th>
+            <th>Qtd</th>
+            <th>Valor Unit.</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of pedidoSelecionado.itens">
+            <td>{{ item.nomeItem }}</td>
+            <td>{{ item.tipoItem === 'P' ? 'Produto' : 'Serviço' }}</td>
+            <td>{{ item.quantidade }}</td>
+            <td>R$ {{ item.valorUnitario?.toFixed(2) }}</td>
+            <td>R$ {{ item.valorTotal?.toFixed(2) }}</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
-</div><object data="" type=""></object>
+</div>

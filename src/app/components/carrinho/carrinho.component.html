@@ -1,69 +1,97 @@
 <div class="carrinho-container">
-  <h2> Carrinho de Compras</h2>
+  <header class="carrinho-header">
+    <h1>Seu Carrinho</h1>
+  </header>
 
-  <div *ngIf="exibirMensagem" [class]="tipoMensagem === 'sucesso' ? 'alerta sucesso' : 'alerta erro'">
-    {{ mensagem }}
-  </div>
-
-  <div *ngIf="itens.length === 0" class="carrinho-vazio">
+  <!-- Estado vazio -->
+  <div *ngIf="itensCarrinho.length === 0" class="carrinho-vazio">
     <p>Seu carrinho está vazio.</p>
-    <button class="btn btn-primary" (click)="voltarCatalogo()">Voltar ao Catálogo</button>
+    <a routerLink="/home" class="btn-continuar-comprando">Voltar ao Catálogo</a>
   </div>
 
-  <div *ngIf="itens.length > 0">
-    <table class="tabela-carrinho">
-      <thead>
-        <tr>
-          <th>Item</th>
-          <th>Tipo</th>
-          <th>Preço Unit.</th>
-          <th>Quantidade</th>
-          <th>Total</th>
-          <th>Ações</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let item of itens">
-          <!-- ✅ CORRIGIDO: item.item.item (o campo "item" do model Item contém o nome) -->
-          <td>{{ item.item.item }}</td>
-          <td>
-            <!-- ✅ CORRIGIDO: tipoItem em vez de tipo -->
-            <span [class]="item.item.tipoItem === 'P' ? 'badge-produto' : 'badge-servico'">
-              {{ item.item.tipoItem === 'P' ? ' Produto' : ' Serviço' }}
-            </span>
-          </td>
-          <td>R$ {{ item.valorUnitario | number:'1.2-2' }}</td>
-          <td>
-            <div class="controle-quantidade">
-              <button (click)="alterarQuantidade(item, item.quantidade - 1)" class="btn-qtd">-</button>
-              <input
-                type="number"
-                [value]="item.quantidade"
-                (change)="alterarQuantidade(item, $any($event.target).value)"
-                min="1"
-                class="input-qtd"
-              >
-              <button (click)="alterarQuantidade(item, item.quantidade + 1)" class="btn-qtd">+</button>
-            </div>
-          </td>
-          <td class="valor-total">R$ {{ item.valorTotal | number:'1.2-2' }}</td>
-          <td>
-            <button class="btn btn-remover" (click)="removerItem(item.item.idItem)">🗑️ Remover</button>
-          </td>
-        </tr>
-      </tbody>
-      <tfoot>
-        <tr>
-          <td colspan="4" class="total-label"><strong>TOTAL:</strong></td>
-          <td class="total-valor"><strong>R$ {{ valorTotal | number:'1.2-2' }}</strong></td>
-          <td></td>
-        </tr>
-      </tfoot>
-    </table>
+  <!-- Conteúdo do carrinho -->
+  <div *ngIf="itensCarrinho.length > 0" class="carrinho-conteudo">
+    
+    <div class="lista-itens">
+      <div *ngFor="let itemCarrinho of itensCarrinho" class="item-card">
+        <div class="item-info">
+          <h3>{{ itemCarrinho.item.item }}</h3>
+          <span class="item-categoria">{{ itemCarrinho.item.categoria }}</span>
+          <span class="item-tipo">{{ itemCarrinho.item.tipoItem === 'P' ? 'Produto' : 'Serviço' }}</span>
+        </div>
 
-    <div class="acoes-carrinho">
-      <button class="btn btn-secondary" (click)="voltarCatalogo()">Continuar Comprando</button>
-      <button class="btn btn-confirmar" (click)="confirmarPedido()">✅ Confirmar Pedido</button>
+        <div class="item-controles">
+          <div class="quantidade-wrapper">
+            <button (click)="alterarQuantidade(itemCarrinho.item.idItem, itemCarrinho.quantidade - 1)">-</button>
+            <span>{{ itemCarrinho.quantidade }}</span>
+            <button (click)="alterarQuantidade(itemCarrinho.item.idItem, itemCarrinho.quantidade + 1)">+</button>
+          </div>
+          
+          <div class="item-precos">
+            <span class="unitario">R$ {{ itemCarrinho.valorUnitario.toFixed(2) }} un.</span>
+            <span class="total-item">R$ {{ itemCarrinho.valorTotal.toFixed(2) }}</span>
+          </div>
+
+          <button class="btn-remover" (click)="removerItem(itemCarrinho.item.idItem)" title="Remover item">
+            🗑️
+          </button>
+        </div>
+      </div>
+
+      <button class="btn-limpar" (click)="limparTudo()">Esvaziar Carrinho</button>
+    </div>
+
+    <!-- Resumo e Checkout -->
+    <div class="resumo-pedido">
+      <h2>Resumo do Pedido</h2>
+      <div class="linha-total">
+        <span>Total a pagar:</span>
+        <span class="valor-final">R$ {{ valorTotal.toFixed(2) }}</span>
+      </div>
+      
+      <button 
+        class="btn-finalizar" 
+        (click)="confirmarPedido()" 
+        [disabled]="processando"
+      >
+        {{ processando ? 'Processando...' : 'Confirmar Pedido' }}
+      </button>
     </div>
   </div>
-</div>
+
+  <!-- Modal de Identificação -->
+  <div *ngIf="mostrarModalIdentificacao" class="modal-overlay" (click)="fecharModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <h2>Identifique-se para finalizar</h2>
+      <p>Informe os dados usados no seu cadastro para vincular este pedido a você.</p>
+
+      <div *ngIf="erroIdentificacao" class="erro-modal">{{ erroIdentificacao }}</div>
+
+      <form (ngSubmit)="identificarEContinuar()">
+        <label>Email:</label>
+        <input 
+          type="email" 
+          [(ngModel)]="emailIdentificacao" 
+          name="email" 
+          required 
+          placeholder="seu@email.com"
+        />
+
+        <label>CPF (apenas números):</label>
+        <input 
+          type="text" 
+          [(ngModel)]="cpfIdentificacao" 
+          name="cpf" 
+          required 
+          placeholder="00000000000"
+          maxlength="11"
+        />
+
+        <div class="modal-acoes">
+          <button type="button" class="btn-cancelar" (click)="fecharModal()">Cancelar</button>
+          <button type="submit" class="btn-confirmar" [disabled]="processando">
+            {{ processando ? 'Verificando...' : 'Continuar' }}
+          </button>
+        </div>
+      </form>
+    </div>

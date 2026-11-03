@@ -1,138 +1,156 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Router } from '@angular/router';
-import { CommonModule, DecimalPipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+import { Subscription } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
+
 import { CarrinhoService, ItemCarrinho } from '../../services/carrinho/carrinho.service';
 import { PedidoService } from '../../services/pedido/pedido.service';
-import { Pedido, ItemPedido } from '../../models/pedido';
-import { Subscription } from 'rxjs';
+import { PessoaService } from '../../services/pessoas/pessoas.service';
+import { Pedido } from '../../models/pedido';
 
 @Component({
   selector: 'app-carrinho',
   standalone: true,
-  imports: [CommonModule, FormsModule, DecimalPipe],
+  imports: [CommonModule, FormsModule],
   templateUrl: './carrinho.component.html',
   styleUrls: ['./carrinho.component.css']
 })
 export class CarrinhoComponent implements OnInit, OnDestroy {
-  itens: ItemCarrinho[] = [];
+  itensCarrinho: ItemCarrinho[] = [];
   valorTotal: number = 0;
-  mensagem: string = '';
-  tipoMensagem: 'sucesso' | 'erro' = 'erro';
-  exibirMensagem: boolean = false;
-  idCliente: number | null = null;
-  private subscription: Subscription = new Subscription();
+  processando: boolean = false;
+
+  // Controle do modal de identificação
+  mostrarModalIdentificacao: boolean = false;
+  emailIdentificacao: string = '';
+  cpfIdentificacao: string = '';
+  erroIdentificacao: string = '';
+
+  private subscription!: Subscription;
 
   constructor(
     private carrinhoService: CarrinhoService,
     private pedidoService: PedidoService,
+    private pessoaService: PessoaService,
     private router: Router
   ) {}
 
-  ngOnInit(): void {
-    this.subscription.add(
-      this.carrinhoService.itens$.subscribe((itens: ItemCarrinho[]) => {
-        this.itens = itens;
-        this.valorTotal = this.carrinhoService.getValorTotal();
-      })
-    );
-    this.carregarCliente();
-  }
-
-  ngOnDestroy(): void {
-    this.subscription.unsubscribe();
-  }
-
-  private carregarCliente(): void {
-    const clienteSalvo = localStorage.getItem('clienteAtual');
-    if (clienteSalvo) {
-      const cliente = JSON.parse(clienteSalvo);
-      this.idCliente = cliente.idPessoa;
-    }
-  }
-
-  alterarQuantidade(item: ItemCarrinho, quantidade: number): void {
-    const erro = this.carrinhoService.alterarQuantidade(item.item.idItem, quantidade);
-    if (erro) {
-      this.exibirMensagemErro(erro);
-    }
-  }
-
-  removerItem(idItem: number): void {
-    this.carrinhoService.removerItem(idItem);
-    this.exibirMensagemSucesso('Item removido do carrinho.');
-  }
-
-  confirmarPedido(): void {
-    if (this.itens.length === 0) {
-      this.exibirMensagemErro('O carrinho está vazio.');
-      return;
-    }
-
-    if (!this.idCliente) {
-      this.exibirMensagemErro('Cliente não identificado. Faça o cadastro primeiro.');
-      this.router.navigate(['/cadastro']);
-      return;
-    }
-
-    for (const itemCarrinho of this.itens) {
-      if (itemCarrinho.item.tipoItem === 'P') {
-        const estoque = itemCarrinho.item.quantidadeEstoque ?? 0;
-        if (itemCarrinho.quantidade > estoque) {
-          this.exibirMensagemErro(`Estoque insuficiente para "${itemCarrinho.item.item}". Disponível: ${estoque}`);
-          return;
-        }
-      }
-    }
-
-    const itensPedido: ItemPedido[] = this.itens.map(i => ({
-      idItem: i.item.idItem,
-      nomeItem: i.item.item,
-      tipoItem: i.item.tipoItem,
-      quantidade: i.quantidade,
-      valorUnitario: i.valorUnitario,
-      valorTotal: i.valorTotal,
-      estoqueDisponivel: i.item.quantidadeEstoque ?? undefined
-    }));
-
-    const pedido: Pedido = {
-      idPessoa: this.idCliente,
-      dataPedido: new Date().toISOString(),
-      valorTotal: this.valorTotal,
-      status: 'Aberto',
-      itens: itensPedido
-    };
-
-    this.pedidoService.cadastrarPedido(pedido).subscribe({
-      next: (pedidoCriado: any) => {
-        const id = pedidoCriado.idPedido || pedidoCriado.idAtendimento;
-        this.exibirMensagemSucesso(`Pedido #${id} registrado com sucesso!`);
-        this.carrinhoService.limparCarrinho();
-        setTimeout(() => {
-          this.router.navigate(['/meus-pedidos']);
-        }, 2000);
-      },
-      error: (erro: any) => {
-        this.exibirMensagemErro(erro);
-      }
+  ngOnInit() {
+    // Assina as mudanças no carrinho para atualizar a tela reativamente
+    this.subscription = this.carrinhoService.itens$.subscribe(itens => {
+      this.itensCarrinho = itens;
+      this.valorTotal = this.carrinhoService.getValorTotal();
     });
   }
 
-  voltarCatalogo(): void {
-    this.router.navigate(['/home']);
+  ngOnDestroy() {
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
-  exibirMensagemSucesso(msg: string): void {
-    this.mensagem = msg;
-    this.tipoMensagem = 'sucesso';
-    this.exibirMensagem = true;
-    setTimeout(() => this.exibirMensagem = false, 3000);
+  // --- Ações do Carrinho ---
+
+  alterarQuantidade(idItem: number, novaQtd: number) {
+    const erro = this.carrinhoService.alterarQuantidade(idItem, novaQtd);
+    if (erro) alert(erro);
   }
 
-  exibirMensagemErro(msg: string): void {
-    this.mensagem = msg;
-    this.tipoMensagem = 'erro';
-    this.exibirMensagem = true;
-    setTimeout(() => this.exibirMensagem = false, 4000);
+  removerItem(idItem: number) {
+    this.carrinhoService.removerItem(idItem);
+  }
+
+  limparTudo() {
+    if (confirm('Tem certeza que deseja esvaziar o carrinho?')) {
+      this.carrinhoService.limparCarrinho();
+    }
+    }
+
+  // --- Lógica de Checkout e Identificação ---
+
+  async confirmarPedido() {
+    if (this.itensCarrinho.length === 0) return;
+
+    const idPessoaSalvo = localStorage.getItem('idPessoa');
+
+    if (!idPessoaSalvo) {
+      // Se não tem cliente identificado, abre o modal
+      this.mostrarModalIdentificacao = true;
+      this.erroIdentificacao = '';
+    } else {
+      // Se já está identificado, processa direto
+      await this.processarPedido(Number(idPessoaSalvo));
+    }
+  }
+
+  async identificarEContinuar() {
+    this.erroIdentificacao = '';
+    
+    if (!this.emailIdentificacao.trim() || !this.cpfIdentificacao.trim()) {
+      this.erroIdentificacao = 'Por favor, preencha ambos os campos.';
+      return;
+    }
+
+    this.processando = true;
+
+    try {
+      // Chama o endpoint de login que criamos no backend
+      const cliente = await firstValueFrom(
+        this.pessoaService.login(this.emailIdentificacao.trim(), this.cpfIdentificacao.trim())
+      );
+
+      // Salva no localStorage para persistir a sessão
+      localStorage.setItem('idPessoa', String(cliente.idPessoa));
+      localStorage.setItem('nomeCliente', cliente.nome);
+
+      this.mostrarModalIdentificacao = false;
+      await this.processarPedido(cliente.idPessoa);
+      
+    } catch (err: any) {
+      this.erroIdentificacao = err.error || 'Email ou CPF inválidos. Verifique seus dados ou cadastre-se.';
+    } finally {
+      this.processando = false;
+    }
+  }
+
+  fecharModal() {
+    this.mostrarModalIdentificacao = false;
+    this.emailIdentificacao = '';
+    this.cpfIdentificacao = '';
+    this.erroIdentificacao = '';
+  }
+
+  private async processarPedido(idPessoa: number) {
+    this.processando = true;
+
+    // Monta o objeto Pedido conforme o DTO do backend (PedidoPostDTO)
+    const pedido: Pedido = {
+      idPessoa: idPessoa,
+      dataPedido: new Date().toISOString(),
+      status: 'Aberto',
+      itens: this.itensCarrinho.map(itemCarrinho => ({
+        idItem: itemCarrinho.item.idItem,
+        quantidade: itemCarrinho.quantidade,
+        valorUnitario: itemCarrinho.valorUnitario,
+        idFuncionario: null // Pode ser expandido no futuro
+      }))
+    };
+
+    try {
+      const resposta = await firstValueFrom(this.pedidoService.cadastrarPedido(pedido));
+      
+      alert(`Pedido #${resposta.idPedido} realizado com sucesso!`);
+      this.carrinhoService.limparCarrinho();
+      this.router.navigate(['/meus-pedidos']);
+      
+    } catch (err: any) {
+      // Trata erros do backend (ex: estoque insuficiente disparado pelo trigger)
+      const msgErro = err.error || err.message || 'Erro desconhecido ao processar o pedido.';
+      alert(`Falha ao finalizar pedido:\n${msgErro}`);
+    } finally {
+      this.processando = false;
+    }
   }
 }

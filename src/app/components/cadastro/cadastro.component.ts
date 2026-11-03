@@ -2,7 +2,7 @@ import { Component, inject } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { Router } from '@angular/router';
 import { PessoaService } from '../../services/pessoas/pessoas.service';
-import { Pessoa } from '../../models/pessoa';
+import { Pessoa, PessoaCreate, PessoaUpdate } from '../../models/pessoa';
 
 @Component({
   selector: 'app-cadastro',
@@ -37,14 +37,14 @@ export class CadastroComponent {
     if (this.enviando) return;
     this.enviando = true;
 
-    const pessoa: Pessoa = {
+    const pessoa: PessoaCreate = {
       nome: this.nome,
       cpf: this.cpf,
-      data_nascimento: this.dataNascimento,
+      dataNascimento: this.dataNascimento,
       sexo: this.sexo,
       email: this.email,
       telefone: this.telefone,
-      ativo_pessoa: 'S',
+      
       endereco: {
         cep: this.cep,
         numero: this.numero,

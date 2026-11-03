@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Item } from '../../models/item'; // Ajuste o caminho se seu model estiver em outro lugar
+import { Item } from '../../models/item'; 
 import { BehaviorSubject } from 'rxjs';
 
 export interface ItemCarrinho {
