@@ -99,3 +99,5 @@ export class CarrinhoService {
     this.itensSubject.next([...this.itens]);
   }
 }
+
+//sim
