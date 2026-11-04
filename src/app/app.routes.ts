@@ -3,6 +3,8 @@ import { HomeComponent } from './components/home/home.component';
 import { CadastroComponent } from './components/cadastro/cadastro.component';
 import { CarrinhoComponent } from './components/carrinho/carrinho.component';
 import { PedidosComponent } from './components/pedidos/pedidos.component';
+import { PainelComponent } from './components/painel/painel.component';
+import { FuncionariosComponent } from './components/funcionarios/funcionarios.component';
 
 
 export const routes: Routes = [
@@ -27,5 +29,13 @@ export const routes: Routes = [
     {
         path: 'meus-pedidos',
         component: PedidosComponent
-    }
+    },
+    {
+        path: 'painel',
+        component: PainelComponent
+    },
+    {
+        path: 'funcionarios',
+        component: FuncionariosComponent
+    },
 ];

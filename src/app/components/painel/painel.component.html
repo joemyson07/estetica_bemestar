@@ -1,0 +1,57 @@
+<div class="painel-container">
+  <header class="painel-header">
+    <h1>Painel Administrativo</h1>
+    <p class="subtitulo">Visão geral do sistema Estética & Bem-Estar</p>
+  </header>
+
+  <!-- Estado de carregamento -->
+  <div *ngIf="carregando" class="estado carregando">
+    <p>Carregando dados...</p>
+  </div>
+
+  <!-- Estado de erro -->
+  <div *ngIf="erro" class="estado erro">
+    <p>{{ erro }}</p>
+  </div>
+
+  <!-- Cards do painel -->
+  <div *ngIf="resumo && !carregando" class="cards-container">
+    
+    <div class="card">
+      <div class="card-icon">👥</div>
+      <h3>Total de Clientes</h3>
+      <p class="numero">{{ resumo.totalClientes }}</p>
+    </div>
+
+    <div class="card">
+      <div class="card-icon">📦</div>
+      <h3>Total de Produtos</h3>
+      <p class="numero">{{ resumo.totalProdutos }}</p>
+    </div>
+
+    <div class="card">
+      <div class="card-icon">💆</div>
+      <h3>Total de Serviços</h3>
+      <p class="numero">{{ resumo.totalServicos }}</p>
+    </div>
+
+    <div class="card">
+      <div class="card-icon">🛒</div>
+      <h3>Total de Pedidos</h3>
+      <p class="numero">{{ resumo.totalPedidos }}</p>
+    </div>
+
+    <div class="card alerta">
+      <div class="card-icon">⏳</div>
+      <h3>Pedidos em Aberto</h3>
+      <p class="numero">{{ resumo.pedidosEmAberto }}</p>
+    </div>
+
+    <div class="card alerta">
+      <div class="card-icon">⚠️</div>
+      <h3>Itens com Estoque Baixo</h3>
+      <p class="numero">{{ resumo.itensComEstoqueBaixo }}</p>
+    </div>
+
+  </div>
+</div>

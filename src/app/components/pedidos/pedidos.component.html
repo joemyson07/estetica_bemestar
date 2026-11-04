@@ -1,5 +1,5 @@
 <div class="pedidos-container">
-  <h2> Meus Pedidos</h2>
+  <h2>Meus Pedidos</h2>
 
   <div *ngIf="exibirMensagem" [class]="tipoMensagem === 'sucesso' ? 'alerta sucesso' : 'alerta erro'">
     {{ mensagem }}
@@ -30,6 +30,20 @@
       </div>
 
       <div *ngIf="pedidoSelecionado?.idPedido === pedido.idPedido" class="pedido-detalhes">
+        
+        <!-- ✅ INSERIR AQUI: Botões de Ação (só aparecem se o pedido estiver Aberto) -->
+        <div *ngIf="pedido.status?.toLowerCase() === 'aberto'" class="acoes-pedido">
+          <button class="btn-acao btn-cancelar" (click)="cancelarPedido(pedido.idPedido!, $event)">
+            🚫 Cancelar Pedido
+          </button>
+          <!-- Descomente a linha abaixo apenas se a atividade exigir exclusão física -->
+          <!-- <button class="btn-acao btn-excluir" (click)="excluirPedido(pedido.idPedido!, $event)"> 🗑️ Excluir Permanentemente </button> -->
+        </div>
+        
+        <div *ngIf="pedido.status?.toLowerCase() !== 'aberto'" class="aviso-bloqueio">
+          <p>ℹ️ Este pedido não pode ser cancelado pois já está em processamento, concluído ou cancelado.</p>
+        </div>
+
         <h4>Itens do Pedido:</h4>
         <table class="tabela-itens">
           <thead>
@@ -44,8 +58,7 @@
           <tbody>
             <tr *ngFor="let item of pedido.itens">
               <td>{{ item.nomeItem }}</td>
-              <!-- ✅ CORRIGIDO: tipoItem em vez de tipo -->
-              <td>{{ item.tipoItem === 'P' ? '' : '' }} {{ item.tipoItem === 'P' ? 'Produto' : 'Serviço' }}</td>
+              <td>{{ item.tipoItem === 'P' ? 'Produto' : 'Serviço' }}</td>
               <td>{{ item.quantidade }}</td>
               <td>R$ {{ item.valorUnitario | number:'1.2-2' }}</td>
               <td>R$ {{ item.valorTotal | number:'1.2-2' }}</td>
@@ -55,4 +68,4 @@
       </div>
     </div>
   </div>
-</div><object data="" type=""></object>
+</div>

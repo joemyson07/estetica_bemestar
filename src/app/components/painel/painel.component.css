@@ -1,0 +1,133 @@
+.painel-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px 24px;
+}
+
+.painel-header {
+  margin-bottom: 32px;
+  border-bottom: 3px solid var(--cor-primaria, #b91c1c);
+  padding-bottom: 16px;
+}
+
+.painel-header h1 {
+  margin: 0;
+  color: var(--cor-texto, #171717);
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.subtitulo {
+  margin: 8px 0 0;
+  color: var(--cor-texto-secundario, #525252);
+  font-size: 14px;
+}
+
+/* Estados (carregando/erro) */
+.estado {
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+  margin: 24px 0;
+}
+
+.estado.carregando {
+  background: #f5f5f5;
+  color: var(--cor-texto-secundario, #525252);
+}
+
+.estado.erro {
+  background: #fef2f2;
+  color: var(--cor-primaria, #b91c1c);
+  border-left: 4px solid var(--cor-primaria, #b91c1c);
+}
+
+/* Grid dos cards */
+.cards-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+}
+
+/* Card padrão */
+.card {
+  background: var(--cor-fundo, #ffffff);
+  border: 1px solid var(--cor-borda, #e5e5e5);
+  border-radius: 12px;
+  padding: 24px;
+  text-align: center;
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 8%);
+}
+
+.card-icon {
+  font-size: 32px;
+  margin-bottom: 12px;
+}
+
+.card h3 {
+  margin: 0 0 8px;
+  color: var(--cor-texto-secundario, #525252);
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.card .numero {
+  margin: 0;
+  font-size: 40px;
+  font-weight: 700;
+  color: var(--cor-texto, #171717);
+  line-height: 1;
+}
+
+/* Card de alerta (pedidos em aberto e estoque baixo) */
+.card.alerta {
+  background: #fffbeb;
+  border-color: #fbbf24;
+}
+
+.card.alerta h3 {
+  color: #92400e;
+}
+
+.card.alerta .numero {
+  color: #b45309;
+}
+
+/* Responsividade */
+@media (max-width: 600px) {
+  .painel-container {
+    padding: 20px 16px;
+  }
+
+  .painel-header h1 {
+    font-size: 22px;
+  }
+
+  .card .numero {
+    font-size: 32px;
+  }
+
+  .cards-container {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .card {
+    padding: 16px;
+  }
+}
+
+/* Acessibilidade */
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    transition: none;
+  }
+}

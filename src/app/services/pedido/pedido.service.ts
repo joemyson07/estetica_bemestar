@@ -30,17 +30,39 @@ export class PedidoService {
     );
   }
 
-  atualizarStatus(id: number, status: string): Observable<any> {
-    return this.http.put(`${this.apiUrl}/${id}/status`, { status }).pipe(
+ atualizarStatus(id: number, status: string): Observable<any> {
+    // ✅ O backend espera um PedidoPutDTO com idPedido e status
+    const body = {
+      idPedido: id,
+      status: status
+    };
+
+    return this.http.put(`${this.apiUrl}/${id}/status`, body).pipe(
       catchError(this.handleError)
     );
   }
 
   consultarPedidosPorCliente(idPessoa: number): Observable<Pedido[]> {
-    return this.http.get<Pedido[]>(`http://localhost:5000/api/pessoas/${idPessoa}/pedidos`).pipe(
+    return this.http.get<Pedido[]>(`http://localhost:5083/api/pessoas/${idPessoa}/pedidos`).pipe(
       catchError(this.handleError)
     );
   }
+
+    // ... (código anterior)
+
+  // ✅ NOVO: Cancelar pedido (Muda o status para 'Cancelado')
+  cancelarPedido(id: number): Observable<any> {
+    return this.atualizarStatus(id, 'Cancelado');
+  }
+
+  // ✅ NOVO: Excluir pedido fisicamente (Use com cautela)
+  excluirPedido(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  // ... (handleError)
 
   private handleError(error: HttpErrorResponse) {
     let mensagem = 'Erro desconhecido';

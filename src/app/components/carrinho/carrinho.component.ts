@@ -4,8 +4,9 @@ import { CommonModule, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CarrinhoService, ItemCarrinho } from '../../services/carrinho/carrinho.service';
 import { PedidoService } from '../../services/pedido/pedido.service';
+import { PessoaService } from '../../services/pessoas/pessoas.service'; // ✅ ADICIONAR
 import { Pedido, ItemPedido } from '../../models/pedido';
-import { Subscription } from 'rxjs';
+import { Subscription, firstValueFrom } from 'rxjs'; // ✅ ADICIONAR firstValueFrom
 
 @Component({
   selector: 'app-carrinho',
@@ -21,11 +22,20 @@ export class CarrinhoComponent implements OnInit, OnDestroy {
   tipoMensagem: 'sucesso' | 'erro' = 'erro';
   exibirMensagem: boolean = false;
   idCliente: number | null = null;
+  
+  // ✅ NOVOS: Controle do modal de identificação
+  mostrarModalIdentificacao: boolean = false;
+  emailIdentificacao: string = '';
+  cpfIdentificacao: string = '';
+  erroIdentificacao: string = '';
+  processando: boolean = false;
+  
   private subscription: Subscription = new Subscription();
 
   constructor(
     private carrinhoService: CarrinhoService,
     private pedidoService: PedidoService,
+    private pessoaService: PessoaService, // ✅ ADICIONAR
     private router: Router
   ) {}
 
@@ -43,11 +53,12 @@ export class CarrinhoComponent implements OnInit, OnDestroy {
     this.subscription.unsubscribe();
   }
 
+  // ✅ CORRIGIDO: Usar as chaves corretas do localStorage
   private carregarCliente(): void {
-    const clienteSalvo = localStorage.getItem('clienteAtual');
-    if (clienteSalvo) {
-      const cliente = JSON.parse(clienteSalvo);
-      this.idCliente = cliente.idPessoa;
+    const idSalvo = localStorage.getItem('idPessoa'); // ✅ MUDOU de 'clienteAtual'
+    if (idSalvo) {
+      this.idCliente = Number(idSalvo);
+      console.log('✅ Cliente carregado do localStorage:', this.idCliente);
     }
   }
 
@@ -63,18 +74,21 @@ export class CarrinhoComponent implements OnInit, OnDestroy {
     this.exibirMensagemSucesso('Item removido do carrinho.');
   }
 
-  confirmarPedido(): void {
+  // ✅ CORRIGIDO: Adicionar modal de identificação
+  async confirmarPedido(): Promise<void> {
     if (this.itens.length === 0) {
       this.exibirMensagemErro('O carrinho está vazio.');
       return;
     }
 
+    // ✅ Se não tem cliente identificado, abre o modal (em vez de redirecionar para /cadastro)
     if (!this.idCliente) {
-      this.exibirMensagemErro('Cliente não identificado. Faça o cadastro primeiro.');
-      this.router.navigate(['/cadastro']);
+      this.mostrarModalIdentificacao = true;
+      this.erroIdentificacao = '';
       return;
     }
 
+    // Validação de estoque
     for (const itemCarrinho of this.itens) {
       if (itemCarrinho.item.tipoItem === 'P') {
         const estoque = itemCarrinho.item.quantidadeEstoque ?? 0;
@@ -85,6 +99,7 @@ export class CarrinhoComponent implements OnInit, OnDestroy {
       }
     }
 
+    // Monta o pedido
     const itensPedido: ItemPedido[] = this.itens.map(i => ({
       idItem: i.item.idItem,
       nomeItem: i.item.item,
@@ -103,6 +118,8 @@ export class CarrinhoComponent implements OnInit, OnDestroy {
       itens: itensPedido
     };
 
+    console.log('📤 Enviando pedido:', pedido);
+
     this.pedidoService.cadastrarPedido(pedido).subscribe({
       next: (pedidoCriado: any) => {
         const id = pedidoCriado.idPedido || pedidoCriado.idAtendimento;
@@ -113,9 +130,52 @@ export class CarrinhoComponent implements OnInit, OnDestroy {
         }, 2000);
       },
       error: (erro: any) => {
-        this.exibirMensagemErro(erro);
+        console.error('❌ Erro ao criar pedido:', erro);
+        this.exibirMensagemErro(erro.error || erro.message || 'Erro ao criar pedido');
       }
     });
+  }
+
+  // ✅ NOVOS: Métodos do modal de identificação
+  async identificarCliente(): Promise<void> {
+    this.erroIdentificacao = '';
+    
+    const cpfLimpo = this.cpfIdentificacao.replace(/\D/g, '');
+    const emailLimpo = this.emailIdentificacao.trim().toLowerCase();
+
+    if (!emailLimpo || !cpfLimpo) {
+      this.erroIdentificacao = 'Preencha email e CPF.';
+      return;
+    }
+
+    this.processando = true;
+
+    try {
+      const cliente = await firstValueFrom(
+        this.pessoaService.login(emailLimpo, cpfLimpo)
+      );
+      
+      localStorage.setItem('idPessoa', String(cliente.idPessoa));
+      localStorage.setItem('nomeCliente', cliente.nome);
+      
+      this.idCliente = cliente.idPessoa;
+      this.mostrarModalIdentificacao = false;
+      
+      // Continua com o pedido
+      await this.confirmarPedido();
+      
+    } catch (err: any) {
+      this.erroIdentificacao = err.error || 'Email ou CPF inválidos.';
+    } finally {
+      this.processando = false;
+    }
+  }
+
+  fecharModal(): void {
+    this.mostrarModalIdentificacao = false;
+    this.emailIdentificacao = '';
+    this.cpfIdentificacao = '';
+    this.erroIdentificacao = '';
   }
 
   voltarCatalogo(): void {
