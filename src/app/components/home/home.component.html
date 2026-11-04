@@ -6,13 +6,6 @@
     <a routerLink="/carrinho" class="link-carrinho">
       Carrinho ({{ carrinho.getQuantidadeTotal() }})
     </a>
-
-    <ul>
-        <li>
-            <a routerLink="/cadastro" >Cadastro</a>
-        </li>
-    </ul>
-    
   </nav>
 </header>
 
@@ -35,7 +28,9 @@
         <li>
           <button type="button"
                   [class.ativa]="categoriaSelecionada() === c.idcategoria"
-                  (click)="selecionarCategoria(c.idcategoria)">{{ c.categoria }}</button>
+                  (click)="selecionarCategoria(c.idcategoria)">
+            {{ c.categoria }}
+          </button>
         </li>
       }
     </ul>

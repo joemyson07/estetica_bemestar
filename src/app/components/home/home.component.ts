@@ -27,15 +27,19 @@ export class HomeComponent {
   carregando = signal(true);
   erro = signal('');
   aviso = signal('');
-
   itensFiltrados = computed(() => {
     const termo = this.busca().trim().toLowerCase();
     const cat = this.categoriaSelecionada();
 
-    return this.itens().filter(i =>
-      (cat === null || i.idCategoria === cat) &&
-      (termo === '' || i.item.toLowerCase().includes(termo))
-    );
+    return this.itens().filter(i =>{
+      const itemCatId = Number(i.idCategoria);
+      const filtroCatId = cat !== null ? Number(cat) : null;
+      
+      const matchCategoria = filtroCatId === null || itemCatId === filtroCatId;
+      const matchBusca = termo === '' || i.item.toLowerCase().includes(termo);
+      
+      return matchCategoria && matchBusca;
+    });
   });
 
   ngOnInit(): void {

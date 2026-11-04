@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { PainelService } from '../../services/painel/painel.service';
-import { Painel } from '../../models/painel';
+import { PainelResumo } from '../../models/painel';
 
 @Component({
   selector: 'app-painel',
@@ -11,7 +11,7 @@ import { Painel } from '../../models/painel';
   styleUrls: ['./painel.component.css']
 })
 export class PainelComponent implements OnInit {
-  resumo?: Painel;
+  resumo?: PainelResumo;
   carregando = true;
   erro = '';
 

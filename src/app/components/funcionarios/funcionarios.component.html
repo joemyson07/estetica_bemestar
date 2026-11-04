@@ -1,0 +1,128 @@
+<div class="funcionarios-container">
+    <header class="page-header">
+      <h1>Gerenciamento de Funcionários</h1>
+      <button class="btn-primary" (click)="abrirFormulario()" *ngIf="!formularioAberto">
+        + Novo Funcionário
+      </button>
+    </header>
+  
+    <div *ngIf="erro" class="alerta erro">{{ erro }}</div>
+    <div *ngIf="carregando" class="alerta info">Carregando dados...</div>
+  
+    <!-- Tabela de Listagem -->
+    <div *ngIf="!carregando && !formularioAberto" class="tabela-wrapper">
+      <table class="tabela-dados">
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>CPF</th>
+            <th>Cargo</th>
+            <th>Admissão</th>
+            <th>Status</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let func of funcionarios">
+            <td>{{ func.nome }}</td>
+            <td>{{ func.cpf }}</td>
+            <td>{{ func.cargo }}</td>
+            <td>{{ func.dataAdmissao | date:'dd/MM/yyyy' }}</td>
+            <td>
+              <span class="badge" [class.ativo]="func.ativo" [class.inativo]="!func.ativo">
+                {{ func.ativo ? 'Ativo' : 'Inativo' }}
+              </span>
+            </td>
+            <td class="acoes">
+              <button class="btn-sm btn-editar" (click)="abrirFormulario(func)" [disabled]="!func.ativo">Editar</button>
+              <button class="btn-sm btn-desativar" (click)="desativarFuncionario(func.idPessoa, func.nome)" *ngIf="func.ativo">Desativar</button>
+            </td>
+          </tr>
+          <tr *ngIf="funcionarios.length === 0">
+            <td colspan="6" class="sem-dados">Nenhum funcionário encontrado.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  
+    <!-- Formulário de Cadastro/Edição -->
+    <div *ngIf="formularioAberto" class="formulario-card">
+      <h2>{{ modoEdicao ? 'Editar Funcionário' : 'Novo Funcionário' }}</h2>
+      
+      <div class="form-grid">
+        <!-- Dados Pessoais -->
+        <div class="form-section">
+          <h3>Dados Pessoais</h3>
+          <div class="input-group">
+            <label>Nome Completo *</label>
+            <input type="text" [(ngModel)]="formData.nome" required>
+          </div>
+          <div class="input-row">
+            <div class="input-group">
+              <label>CPF * (apenas números)</label>
+              <input type="text" [(ngModel)]="formData.cpf" maxlength="11" required>
+            </div>
+            <div class="input-group">
+              <label>Data de Nascimento *</label>
+              <input type="date" [(ngModel)]="formData.dataNascimento" required>
+            </div>
+          </div>
+          <div class="input-row">
+            <div class="input-group">
+              <label>Sexo *</label>
+              <select [(ngModel)]="formData.sexo">
+                <option value="M">Masculino</option>
+                <option value="F">Feminino</option>
+                <option value="O">Outro</option>
+              </select>
+            </div>
+            <div class="input-group">
+              <label>Telefone</label>
+              <input type="text" [(ngModel)]="formData.telefone">
+            </div>
+          </div>
+          <div class="input-group">
+            <label>E-mail *</label>
+            <input type="email" [(ngModel)]="formData.email" required>
+          </div>
+        </div>
+  
+        <!-- Dados Profissionais -->
+        <div class="form-section">
+          <h3>Dados Profissionais</h3>
+          <div class="input-group">
+            <label>Cargo *</label>
+            <input type="text" [(ngModel)]="formData.cargo" placeholder="Ex: Esteticista, Recepcionista" required>
+          </div>
+          <div class="input-group">
+            <label>Data de Admissão *</label>
+            <input type="date" [(ngModel)]="formData.dataAdmissao" required>
+          </div>
+        </div>
+  
+        <!-- Endereço -->
+        <div class="form-section full-width">
+          <h3>Endereço</h3>
+          <div class="input-row">
+            <div class="input-group">
+              <label>CEP</label>
+              <input type="text" [(ngModel)]="formData.endereco.cep" maxlength="8">
+            </div>
+            <div class="input-group">
+              <label>Número *</label>
+              <input type="text" [(ngModel)]="formData.endereco.numero" required>
+            </div>
+            <div class="input-group">
+              <label>Complemento</label>
+              <input type="text" [(ngModel)]="formData.endereco.complemento">
+            </div>
+          </div>
+        </div>
+      </div>
+  
+      <div class="form-actions">
+        <button class="btn-secondary" (click)="fecharFormulario()">Cancelar</button>
+        <button class="btn-primary" (click)="salvarFuncionario()">Salvar Funcionário</button>
+      </div>
+    </div>
+  </div>

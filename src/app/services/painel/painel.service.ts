@@ -2,31 +2,25 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { Painel } from '../../models/painel';
+import { PainelResumo } from '../../models/painel';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PainelService {
 
-  // ⚠️ Ajuste a porta se necessário (5083 é a que seu backend está rodando)
   private apiUrl = 'http://localhost:5083/api/painel/resumo';
 
   constructor(private http: HttpClient) { }
 
-  /**
-   * RF24: Exibir no painel administrativo informações resumidas sobre 
-   * clientes, produtos, serviços, pedidos e estoque
-   */
-  getResumo(): Observable<Painel> {
-    return this.http.get<Painel>(this.apiUrl).pipe(
+
+  getResumo(): Observable<PainelResumo> {
+    return this.http.get<PainelResumo>(this.apiUrl).pipe(
       catchError(this.handleError)
     );
   }
 
-  /**
-   * Tratamento padronizado de erros da API (RF22)
-   */
+
   private handleError(error: HttpErrorResponse) {
     let errorMessage = 'Ocorreu um erro desconhecido na comunicação com o servidor.';
 

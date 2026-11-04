@@ -1,129 +1,135 @@
-import { Router } from '@angular/router'; 
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+import { CommonModule, DecimalPipe, DatePipe } from '@angular/common';
 import { PedidoService } from '../../services/pedido/pedido.service';
-import { PessoaService } from '../../services/pessoas/pessoas.service';
 import { Pedido } from '../../models/pedido';
-import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-pedidos',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, DecimalPipe, DatePipe],
   templateUrl: './pedidos.component.html',
   styleUrls: ['./pedidos.component.css']
 })
 export class PedidosComponent implements OnInit {
   pedidos: Pedido[] = [];
-  pedidoSelecionado?: Pedido;
-  carregando = true;
-  erro = '';
-  
-  // Controle de identificação do cliente
-  clienteIdentificado = false;
-  nomeCliente = '';
-  idPessoa = 0;
-  
-  // Formulário de identificação
-  emailIdentificacao = '';
-  cpfIdentificacao = '';
-  erroIdentificacao = '';
+  pedidoSelecionado: Pedido | null = null;
+  mensagem: string = '';
+  tipoMensagem: 'sucesso' | 'erro' = 'erro';
+  exibirMensagem: boolean = false;
+  idCliente: number | null = null;
+  carregando: boolean = false;
 
   constructor(
     private pedidoService: PedidoService,
-    private pessoaService: PessoaService,
     private router: Router
   ) {}
 
-  ngOnInit() {
-    this.verificarCliente();
+  ngOnInit(): void {
+    this.carregarCliente();
+    this.carregarPedidos();
   }
 
-  verificarCliente() {
-    const idSalvo = localStorage.getItem('idPessoa');
-    const nomeSalvo = localStorage.getItem('nomeCliente');
-
-    if (idSalvo && nomeSalvo) {
-      this.idPessoa = Number(idSalvo);
-      this.nomeCliente = nomeSalvo;
-      this.clienteIdentificado = true;
-      this.carregarPedidos();
-    } else {
-      this.carregando = false;
+  private carregarCliente(): void {
+    const idSalvo = localStorage.getItem('idPessoa'); // ✅ Corrigido
+    if (idSalvo) {
+      this.idCliente = Number(idSalvo);
     }
   }
 
-  async identificarCliente() {
-    this.erroIdentificacao = '';
-    
-    if (!this.emailIdentificacao || !this.cpfIdentificacao) {
-      this.erroIdentificacao = 'Preencha email e CPF.';
+  carregarPedidos(): void {
+    if (!this.idCliente) {
+      this.exibirMensagemErro('Cliente não identificado. Faça o cadastro primeiro.');
       return;
     }
 
-    try {
-      const cliente = await firstValueFrom(
-        this.pessoaService.login(this.emailIdentificacao, this.cpfIdentificacao)
-      );
-      
-      localStorage.setItem('idPessoa', String(cliente.idPessoa));
-      localStorage.setItem('nomeCliente', cliente.nome);
-      
-      this.idPessoa = cliente.idPessoa;
-      this.nomeCliente = cliente.nome;
-      this.clienteIdentificado = true;
-      this.carregarPedidos();
-    } catch (err: any) {
-      this.erroIdentificacao = err.error || 'Email ou CPF inválidos.';
-    }
-  }
-
-  sairConta() {
-    localStorage.removeItem('idPessoa');
-    localStorage.removeItem('nomeCliente');
-    this.clienteIdentificado = false;
-    this.idPessoa = 0;
-    this.nomeCliente = '';
-    this.pedidos = [];
-    this.pedidoSelecionado = undefined;
-  }
-
-  carregarPedidos() {
     this.carregando = true;
-    this.pedidoService.consultarPedidosPorCliente(this.idPessoa).subscribe({
+    this.pedidoService.consultarPedidosPorCliente(this.idCliente).subscribe({
       next: (pedidos) => {
         this.pedidos = pedidos;
         this.carregando = false;
+        if (pedidos.length === 0) {
+          this.exibirMensagemSucesso('Nenhum pedido encontrado.');
+        }
       },
-      error: (err) => {
-        this.erro = 'Erro ao carregar pedidos: ' + err.message;
+      error: (erro) => {
         this.carregando = false;
+        this.exibirMensagemErro(erro);
       }
     });
   }
 
-  selecionarPedido(pedido: Pedido) {
-    this.pedidoSelecionado = pedido;
+  selecionarPedido(pedido: Pedido): void {
+    if (this.pedidoSelecionado?.idPedido === pedido.idPedido) {
+      this.pedidoSelecionado = null; // Fecha se já estiver aberto
+    } else {
+      this.pedidoService.consultarPedidoPorId(pedido.idPedido!).subscribe({
+        next: (pedidoDetalhado) => {
+          this.pedidoSelecionado = pedidoDetalhado;
+        },
+        error: (erro) => this.exibirMensagemErro(erro)
+      });
+    }
   }
 
-  voltarParaLista() {
-    this.pedidoSelecionado = undefined;
+  // ✅ NOVO: Cancelar Pedido
+  cancelarPedido(id: number, event: Event): void {
+    event.stopPropagation(); // Evita que o clique abra os detalhes do pedido
+    
+    if (confirm('Tem certeza que deseja CANCELAR este pedido? Esta ação não pode ser desfeita.')) {
+      this.pedidoService.cancelarPedido(id).subscribe({
+        next: () => {
+          this.exibirMensagemSucesso('Pedido cancelado com sucesso!');
+          this.pedidoSelecionado = null;
+          this.carregarPedidos(); // Recarrega a lista com o status atualizado
+        },
+        error: (erro) => this.exibirMensagemErro(erro)
+      });
+    }
   }
 
-  // Adicione estes métodos dentro da classe PedidosComponent:
-
-voltarCatalogo() {
-  this.router.navigate(['/home']);
-}
-
-getStatusClass(status: string): string {
-  switch (status) {
-    case 'Aberto': return 'status-aberto';
-    case 'Em processamento': return 'status-processando';
-    case 'Concluído': return 'status-concluido';
-    case 'Cancelado': return 'status-cancelado';
-    default: return '';
+  // ✅ NOVO: Excluir Pedido (Opcional, use apenas se o PDF exigir exclusão física)
+  excluirPedido(id: number, event: Event): void {
+    event.stopPropagation();
+    
+    if (confirm('ATENÇÃO: Isso apagará o pedido permanentemente do sistema. Continuar?')) {
+      this.pedidoService.excluirPedido(id).subscribe({
+        next: () => {
+          this.exibirMensagemSucesso('Pedido excluído permanentemente.');
+          this.pedidoSelecionado = null;
+          this.carregarPedidos();
+        },
+        error: (erro) => this.exibirMensagemErro(erro)
+      });
+    }
   }
-}
+
+  getStatusClass(status: string): string {
+    switch (status?.toLowerCase()) {
+      case 'aberto': return 'status-aberto';
+      case 'em processamento': return 'status-processando';
+      case 'concluído': return 'status-concluido';
+      case 'cancelado': return 'status-cancelado';
+      default: return '';
+    }
+  }
+
+  voltarCatalogo(): void {
+    this.router.navigate(['/home']);
+  }
+
+  // ✅ NOVO: Método de sucesso (para padronizar com o erro)
+  exibirMensagemSucesso(msg: string): void {
+    this.mensagem = msg;
+    this.tipoMensagem = 'sucesso';
+    this.exibirMensagem = true;
+    setTimeout(() => this.exibirMensagem = false, 3000);
+  }
+
+  exibirMensagemErro(msg: string): void {
+    this.mensagem = typeof msg === 'string' ? msg : 'Ocorreu um erro inesperado.';
+    this.tipoMensagem = 'erro';
+    this.exibirMensagem = true;
+    setTimeout(() => this.exibirMensagem = false, 4000);
+  }
 }

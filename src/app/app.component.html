@@ -1,14 +1,16 @@
 <nav class="navbar">
-    <div class="logo">Estética & Bem-Estar</div>
-    <ul class="menu">
-      <li><a routerLink="/home" routerLinkActive="ativo">Catálogo</a></li>
-      <li><a routerLink="/cadastro" routerLinkActive="ativo">Cadastro</a></li>
-      <li><a routerLink="/carrinho" routerLinkActive="ativo">
-        Carrinho ({{ quantidadeCarrinho }})
-      </a></li>
-      <li><a routerLink="/painel" routerLinkActive="ativo">Painel</a></li>
-      <li><a routerLink="/meus-pedidos" routerLinkActive="ativo">Meus Pedidos</a></li>
-    </ul>
-  </nav>
-  
+  <div class="logo">Estética & Bem-Estar</div>
+  <ul class="menu">
+    <li><a routerLink="/home" routerLinkActive="ativo">Catálogo</a></li>
+    <li><a routerLink="/cadastro" routerLinkActive="ativo">Cadastro</a></li>
+    <li><a routerLink="/carrinho" routerLinkActive="ativo">
+      Carrinho ({{ quantidadeCarrinho }})
+    </a></li>
+    <li><a routerLink="/painel" routerLinkActive="ativo">Painel Admin</a></li>
+    <li><a routerLink="/clientes" routerLinkActive="ativo">Clientes</a></li>
+    <li><a routerLink="/funcionarios" routerLinkActive="ativo">Funcionários</a></li>
+    <li><a routerLink="/meus-pedidos" routerLinkActive="ativo">Meus Pedidos</a></li>
+  </ul>
+</nav>
+
 <router-outlet></router-outlet>

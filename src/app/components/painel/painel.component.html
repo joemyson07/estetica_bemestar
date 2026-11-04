@@ -4,17 +4,14 @@
       <p class="subtitulo">Visão geral do sistema Estética & Bem-Estar</p>
     </header>
   
-    <!-- Estado de carregamento -->
     <div *ngIf="carregando" class="estado carregando">
       <p>Carregando dados...</p>
     </div>
   
-    <!-- Estado de erro -->
     <div *ngIf="erro" class="estado erro">
       <p>{{ erro }}</p>
     </div>
   
-    <!-- Cards do painel -->
     <div *ngIf="resumo && !carregando" class="cards-container">
       
       <div class="card">
