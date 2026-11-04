@@ -6,6 +6,8 @@ import { PedidosComponent } from './components/pedidos/pedidos.component';
 import { PainelComponent } from './components/painel/painel.component';
 import { FuncionariosComponent } from './components/funcionarios/funcionarios.component';
 import { ClientesComponent } from './components/clientes/clientes.component';
+import { AdminPedidosComponent } from './components/admin-pedidos/admin-pedidos.component';
+import { AdminProdutosComponent } from './components/admin-produtos/admin-produtos.component';
 
 
 export const routes: Routes = [
@@ -42,5 +44,13 @@ export const routes: Routes = [
     {
         path: 'clientes',
         component: ClientesComponent
+    },
+    {
+        path: 'admin-pedidos',
+        component: AdminPedidosComponent
+    },
+    {
+        path: 'admin-produtos',
+        component: AdminProdutosComponent
     }
 ];

@@ -16,7 +16,9 @@
   padding: 40px 24px 64px;
 }
 
-/* Header */
+/* =========================================
+   1. HEADER & ESTADO VAZIO
+   ========================================= */
 .carrinho-header h1 {
   margin: 0 0 28px;
   padding-bottom: 16px;
@@ -27,29 +29,6 @@
   color: var(--cor-texto, #171717);
 }
 
-/* Mensagens de Alerta (Reutilizado do seu CSS antigo) */
-.alerta {
-  margin-bottom: 24px;
-  padding: 16px 20px;
-  border: 1px solid;
-  border-left-width: 4px;
-  border-radius: 8px;
-  line-height: 1.6;
-}
-
-.alerta.sucesso {
-  border-color: #86efac;
-  background: #f0fdf4;
-  color: #166534;
-}
-
-.alerta.erro, .erro-modal {
-  border-color: #fca5a5;
-  background: #fef2f2;
-  color: #991b1b;
-}
-
-/* Carrinho Vazio */
 .carrinho-vazio {
   padding: 56px 24px;
   border: 1px solid var(--cor-borda, #e5e5e5);
@@ -64,7 +43,9 @@
   font-size: 16px;
 }
 
-/* Layout Principal: Grid para separar Lista e Resumo */
+/* =========================================
+   2. LAYOUT PRINCIPAL (GRID)
+   ========================================= */
 .carrinho-conteudo {
   display: grid;
   grid-template-columns: 1fr 380px;
@@ -72,7 +53,9 @@
   align-items: start;
 }
 
-/* Lista de Itens (Cards) */
+/* =========================================
+   3. LISTA DE ITENS (CARDS)
+   ========================================= */
 .lista-itens {
   display: flex;
   flex-direction: column;
@@ -97,7 +80,7 @@
 
 .item-info {
   flex: 1;
-  min-width: 0; /* Previne que o texto estoure o container */
+  min-width: 0;
 }
 
 .item-info h3 {
@@ -108,7 +91,7 @@
   overflow-wrap: anywhere;
 }
 
-/* Badges (Adaptado do seu CSS antigo) */
+/* Badges */
 .item-categoria,
 .item-tipo {
   display: inline-flex;
@@ -203,6 +186,7 @@
   color: var(--cor-texto, #171717);
 }
 
+/* Botões de ação do item */
 .btn-remover {
   display: inline-flex;
   align-items: center;
@@ -244,7 +228,9 @@
   background: #fef2f2;
 }
 
-/* Resumo do Pedido (Sidebar) */
+/* =========================================
+   4. RESUMO DO PEDIDO (SIDEBAR)
+   ========================================= */
 .resumo-pedido {
   position: sticky;
   top: 24px;
@@ -261,6 +247,31 @@
   color: var(--cor-texto, #171717);
   border: none;
   padding: 0;
+}
+
+/* Identificação do Cliente no Resumo */
+.info-cliente {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.info-cliente.identificado {
+  background: #f0fdf4;
+  border: 1px solid #86efac;
+  color: #166534;
+}
+
+.info-cliente.nao-identificado {
+  background: #fef2f2;
+  border: 1px solid #fca5a5;
+  color: #991b1b;
 }
 
 .linha-total {
@@ -284,12 +295,14 @@
   color: var(--cor-primaria, #b91c1c);
 }
 
-/* Botões Principais (Reutilizado do seu CSS antigo) */
-.btn,
+/* =========================================
+   5. BOTÕES CONSOLIDADOS
+   ========================================= */
 .btn-continuar-comprando,
 .btn-finalizar,
 .btn-confirmar,
-.btn-cancelar {
+.btn-cancelar,
+.btn-selecionar {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -309,48 +322,72 @@
   transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease;
 }
 
-.btn-primary,
+/* Estilo Primário (Vermelho) */
 .btn-continuar-comprando,
 .btn-finalizar,
-.btn-confirmar {
+.btn-confirmar,
+.btn-selecionar {
   background: var(--cor-primaria, #b91c1c);
   color: #ffffff;
 }
 
-.btn-primary:hover:not(:disabled),
 .btn-continuar-comprando:hover:not(:disabled),
 .btn-finalizar:hover:not(:disabled),
-.btn-confirmar:hover:not(:disabled) {
+.btn-confirmar:hover:not(:disabled),
+.btn-selecionar:hover:not(:disabled) {
   background: var(--cor-primaria-hover, #991b1b);
 }
 
-.btn-secondary,
+/* Estilo Secundário (Outline) */
 .btn-cancelar {
   border-color: #a3a3a3;
   background: #ffffff;
   color: var(--cor-texto, #171717);
 }
 
-.btn-secondary:hover:not(:disabled),
 .btn-cancelar:hover:not(:disabled) {
   border-color: var(--cor-texto, #171717);
   background: #f5f5f5;
 }
 
-.btn:disabled,
+/* Botão Pequeno (Trocar) */
+.btn-trocar {
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  background: #ffffff;
+  border: 1px solid #166534;
+  color: #166534;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 180ms ease;
+}
+
+.btn-trocar:hover:not(:disabled) {
+  background: #166534;
+  color: #ffffff;
+}
+
+/* Estados Desabilitados */
 .btn-finalizar:disabled,
 .btn-confirmar:disabled,
+.btn-cancelar:disabled,
+.btn-selecionar:disabled,
+.btn-trocar:disabled,
 .quantidade-wrapper button:disabled {
-  border-color: #d4d4d4;
-  background: #e5e5e5;
-  color: #525252;
+  border-color: #d4d4d4 !important;
+  background: #e5e5e5 !important;
+  color: #525252 !important;
   cursor: not-allowed;
 }
 
 /* Foco Acessível */
-.btn:focus-visible,
 .btn-continuar-comprando:focus-visible,
 .btn-finalizar:focus-visible,
+.btn-confirmar:focus-visible,
+.btn-cancelar:focus-visible,
+.btn-selecionar:focus-visible,
+.btn-trocar:focus-visible,
 .quantidade-wrapper button:focus-visible,
 .btn-remover:focus-visible,
 .btn-limpar:focus-visible {
@@ -358,7 +395,9 @@
   outline-offset: 3px;
 }
 
-/* Modal de Identificação */
+/* =========================================
+   6. MODAL DE IDENTIFICAÇÃO
+   ========================================= */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -445,7 +484,9 @@
   margin-top: 8px;
 }
 
-/* Responsividade */
+/* =========================================
+   7. RESPONSIVIDADE
+   ========================================= */
 @media (max-width: 900px) {
   .carrinho-conteudo {
     grid-template-columns: 1fr;
@@ -480,11 +521,12 @@
 
 @media (prefers-reduced-motion: reduce) {
   .item-card,
-  .btn,
   .btn-continuar-comprando,
   .btn-finalizar,
   .btn-confirmar,
   .btn-cancelar,
+  .btn-selecionar,
+  .btn-trocar,
   .btn-remover,
   .btn-limpar,
   .quantidade-wrapper button,

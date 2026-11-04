@@ -1,4 +1,4 @@
 export interface Categoria {
-    idcategoria: number;
+    idCategoria: number;
     categoria: string;
   }

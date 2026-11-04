@@ -44,6 +44,22 @@
     <!-- Resumo e Checkout -->
     <div class="resumo-pedido">
       <h2>Resumo do Pedido</h2>
+
+      <div *ngIf="!nomeClienteAtual" class="info-cliente nao-identificado">
+        <span>Cliente não identificado</span>
+        <button type="button" class="btn-selecionar" (click)="abrirModalIdentificacao()">
+          Selecionar Cliente
+        </button>
+      </div>
+      
+      <!-- SE JÁ TIVER CLIENTE IDENTIFICADO -->
+      <div *ngIf="nomeClienteAtual" class="info-cliente identificado">
+        <span>Olá, <strong>{{ nomeClienteAtual }}</strong></span>
+        <button type="button" class="btn-trocar" (click)="trocarCliente()">
+          Trocar
+        </button>
+      </div>
+
       <div class="linha-total">
         <span>Total a pagar:</span>
         <span class="valor-final">R$ {{ valorTotal.toFixed(2) }}</span>

@@ -27,6 +27,7 @@ export class CarrinhoComponent implements OnInit, OnDestroy {
   emailIdentificacao: string = '';
   cpfIdentificacao: string = '';
   erroIdentificacao: string = '';
+  nomeClienteAtual: string = '';
 
   private subscription!: Subscription;
 
@@ -38,12 +39,20 @@ export class CarrinhoComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    // Assina as mudanças no carrinho para atualizar a tela reativamente
     this.subscription = this.carrinhoService.itens$.subscribe(itens => {
       this.itensCarrinho = itens;
       this.valorTotal = this.carrinhoService.getValorTotal();
     });
+    this.nomeClienteAtual = localStorage.getItem('nomeCliente') || '';
   }
+
+  trocarCliente() {
+    localStorage.removeItem('idPessoa');
+    localStorage.removeItem('nomeCliente');
+    this.nomeClienteAtual = '';
+    this.abrirModalIdentificacao();
+  }
+
 
   ngOnDestroy() {
     if (this.subscription) {
@@ -76,11 +85,8 @@ export class CarrinhoComponent implements OnInit, OnDestroy {
     const idPessoaSalvo = localStorage.getItem('idPessoa');
 
     if (!idPessoaSalvo) {
-      // Se não tem cliente identificado, abre o modal
-      this.mostrarModalIdentificacao = true;
-      this.erroIdentificacao = '';
+      this.abrirModalIdentificacao();
     } else {
-      // Se já está identificado, processa direto
       await this.processarPedido(Number(idPessoaSalvo));
     }
   }
@@ -115,6 +121,13 @@ export class CarrinhoComponent implements OnInit, OnDestroy {
     }
   }
 
+  abrirModalIdentificacao() {
+    this.mostrarModalIdentificacao = true;
+    this.erroIdentificacao = '';
+    this.emailIdentificacao = '';
+    this.cpfIdentificacao = '';
+  }
+
   fecharModal() {
     this.mostrarModalIdentificacao = false;
     this.emailIdentificacao = '';
@@ -134,7 +147,7 @@ export class CarrinhoComponent implements OnInit, OnDestroy {
         idItem: itemCarrinho.item.idItem,
         quantidade: itemCarrinho.quantidade,
         valorUnitario: itemCarrinho.valorUnitario,
-        idFuncionario: null // Pode ser expandido no futuro
+        idFuncionario: null 
       }))
     };
 
@@ -146,7 +159,6 @@ export class CarrinhoComponent implements OnInit, OnDestroy {
       this.router.navigate(['/meus-pedidos']);
       
     } catch (err: any) {
-      // Trata erros do backend (ex: estoque insuficiente disparado pelo trigger)
       const msgErro = err.error || err.message || 'Erro desconhecido ao processar o pedido.';
       alert(`Falha ao finalizar pedido:\n${msgErro}`);
     } finally {

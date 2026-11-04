@@ -19,6 +19,7 @@
       <div class="pedido-header" (click)="selecionarPedido(pedido)">
         <div class="pedido-info">
           <span class="pedido-numero">Pedido #{{ pedido.idPedido }}</span>
+          <span class="pedido-cliente">{{ pedido.nomeCliente }}</span>
           <span class="pedido-data">{{ pedido.dataPedido | date:'dd/MM/yyyy HH:mm' }}</span>
           <span [class]="'status-badge ' + getStatusClass(pedido.status || '')">
             {{ pedido.status }}
@@ -31,17 +32,14 @@
 
       <div *ngIf="pedidoSelecionado?.idPedido === pedido.idPedido" class="pedido-detalhes">
         
-        <!-- ✅ INSERIR AQUI: Botões de Ação (só aparecem se o pedido estiver Aberto) -->
         <div *ngIf="pedido.status?.toLowerCase() === 'aberto'" class="acoes-pedido">
           <button class="btn-acao btn-cancelar" (click)="cancelarPedido(pedido.idPedido!, $event)">
-            🚫 Cancelar Pedido
+             Cancelar Pedido
           </button>
-          <!-- Descomente a linha abaixo apenas se a atividade exigir exclusão física -->
-          <!-- <button class="btn-acao btn-excluir" (click)="excluirPedido(pedido.idPedido!, $event)"> 🗑️ Excluir Permanentemente </button> -->
         </div>
         
         <div *ngIf="pedido.status?.toLowerCase() !== 'aberto'" class="aviso-bloqueio">
-          <p>ℹ️ Este pedido não pode ser cancelado pois já está em processamento, concluído ou cancelado.</p>
+          <p> Este pedido não pode ser cancelado pois já está em processamento, concluído ou cancelado.</p>
         </div>
 
         <h4>Itens do Pedido:</h4>

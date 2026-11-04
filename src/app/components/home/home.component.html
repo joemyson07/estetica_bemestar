@@ -24,11 +24,11 @@
                 [class.ativa]="categoriaSelecionada() === null"
                 (click)="selecionarCategoria(null)">Todas</button>
       </li>
-      @for (c of categorias(); track c.idcategoria) {
+      @for (c of categorias(); track c.idCategoria) {
         <li>
           <button type="button"
-                  [class.ativa]="categoriaSelecionada() === c.idcategoria"
-                  (click)="selecionarCategoria(c.idcategoria)">
+                  [class.ativa]="categoriaSelecionada() === c.idCategoria"
+                  (click)="selecionarCategoria(c.idCategoria)">
             {{ c.categoria }}
           </button>
         </li>
