@@ -15,19 +15,25 @@ export class ItemService {
     );
   }
 
-  // ✅ NOVO: Método necessário para o Admin editar/inativar itens
   atualizar(id: number, item: any): Observable<any> {
     return this.http.put(`${this.apiUrl}/${id}`, item).pipe(
       catchError(this.handleError)
     );
   }
+  
 
-  // ✅ NOVO: Método para listar TODOS os itens (ativos e inativos), útil para o Admin
   listarTodos(): Observable<Item[]> {
     return this.http.get<Item[]>(this.apiUrl).pipe(
       catchError(this.handleError)
     );
   }
+
+  cadastrar(item: any): Observable<any> {
+    return this.http.post(this.apiUrl, item).pipe(
+      catchError(this.handleError)
+    );
+  }
+  
 
   private handleError(error: HttpErrorResponse) {
     let errorMessage = 'Ocorreu um erro desconhecido no servidor.';

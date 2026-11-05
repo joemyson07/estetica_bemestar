@@ -53,7 +53,7 @@
           <p class="cartao-categoria">{{ i.categoria }} · {{ i.tipoItem === 'S' ? 'Serviço' : 'Produto' }}</p>
           <h2>{{ i.item }}</h2>
           <p class="descricao">{{ i.descricaoItem }}</p>
-          <p class="preco">{{ i.preco | currency:'BRL' }}</p>
+          <p class="preco">{{ i.precoVenda || i.preco | currency:'BRL' }}</p>
           <p class="disponibilidade">{{ textoDisponibilidade(i) }}</p>
           <button type="button"
                   [disabled]="!disponivel(i)"

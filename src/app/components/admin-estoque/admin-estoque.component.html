@@ -1,0 +1,87 @@
+<div class="estoque-container">
+    <header class="page-header">
+      <div>
+        <h1>Consulta de Estoque</h1>
+        <p class="subtitulo">Visualize a quantidade disponível de todos os produtos</p>
+      </div>
+    </header>
+  
+    <div *ngIf="erro" class="alerta erro">{{ erro }}</div>
+  
+    <!-- Barra de Filtros -->
+    <div class="filtros-bar" *ngIf="!carregando">
+      <div class="input-busca">
+        <input 
+          type="text" 
+          placeholder="Buscar por nome ou categoria..." 
+          [(ngModel)]="termoBusca" 
+          (ngModelChange)="aplicarFiltros()"
+        >
+      </div>
+  
+      <div class="busca-id">
+        <input 
+          type="number" 
+          placeholder="Buscar por ID..." 
+          [(ngModel)]="buscaId" 
+          (keyup.enter)="buscarPorId()"
+          min="1"
+        >
+        <button class="btn-buscar" (click)="buscarPorId()">Buscar</button>
+        <button class="btn-limpar" (click)="limparBuscaId()" *ngIf="buscaId">Limpar</button>
+      </div>
+  
+      <span class="contador">{{ estoquesFiltrados.length }} produto(s) encontrado(s)</span>
+    </div>
+  
+    <!-- Tabela de Estoque -->
+    <div class="tabela-wrapper" *ngIf="!carregando">
+      <table class="tabela-estoque">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Item</th>
+            <th>Descrição</th>
+            <th>Categoria</th>
+            <th>Unidade</th>
+            <th>Preço Custo</th>
+            <th>Preço Venda</th>
+            <th>Qtd Estoque</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let estoque of estoquesFiltrados" 
+              [class.estoque-baixo]="getEstoqueBaixo(estoque.quantidadeEstoque)">
+            <td class="col-id">#{{ estoque.idItem }}</td>
+            <td class="col-nome"><strong>{{ estoque.nomeItem }}</strong></td>
+            <td class="col-descricao">
+              {{ estoque.descricaoItem ? (estoque.descricaoItem | slice:0:50) + (estoque.descricaoItem.length > 50 ? '...' : '') : '-' }}
+            </td>
+            <td>{{ estoque.categoria || '-' }}</td>
+            <td class="col-unidade">{{ estoque.unidade }}</td>
+            <td>{{ estoque.preco | currency:'BRL' }}</td>
+            <td class="col-preco-venda">{{ estoque.precoVenda | currency:'BRL' }}</td>
+            <td class="col-quantidade">
+              <strong>{{ estoque.quantidadeEstoque }}</strong>
+            </td>
+            <td>
+              <span class="status-badge" [class]="getStatusClass(estoque)">
+                {{ getStatusTexto(estoque) }}
+              </span>
+            </td>
+          </tr>
+          <tr *ngIf="estoquesFiltrados.length === 0">
+            <td colspan="9" class="sem-dados">
+              Nenhum produto encontrado com os filtros atuais.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  
+    <!-- Loading -->
+    <div *ngIf="carregando" class="loading">
+      <p>Carregando estoque...</p>
+    </div>
+  </div>

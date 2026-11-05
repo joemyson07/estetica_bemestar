@@ -23,8 +23,12 @@ export class AdminProdutosComponent implements OnInit {
   
   // Filtros
   termoBusca = '';
-  filtroTipo = 'Todos'; // Todos, P, S
-  filtroCategoria = 0; // 0 = Todas
+  filtroTipo = 'Todos'; 
+  filtroCategoria = 0; 
+
+  modalCategoriaAberto = false;
+  novaCategoriaNome = '';
+  salvandoCategoria = false;
 
   // Modal de Edição/Criação
   modalAberto = false;
@@ -37,7 +41,9 @@ export class AdminProdutosComponent implements OnInit {
     preco: 0,
     tipoItem: 'P',
     idCategoria: 0,
-    ativo: true
+    ativo: true,
+    codigoPreco: 2,      
+    unidade: 'UN' 
   };
 
   constructor(
@@ -64,7 +70,7 @@ export class AdminProdutosComponent implements OnInit {
         this.aplicarFiltros();
         this.carregando = false;
       },
-      error: (err: any) => { // ✅ CORRIGIDO: Adicionado ': any'
+      error: (err: any) => { 
         this.erro = 'Erro ao carregar itens: ' + (err.message || err);
         this.carregando = false;
       }
@@ -81,6 +87,46 @@ export class AdminProdutosComponent implements OnInit {
       return matchBusca && matchTipo && matchCategoria;
     });
   }
+
+  abrirModalCategoria() {
+    this.novaCategoriaNome = '';
+    this.modalCategoriaAberto = true;
+  }
+
+  fecharModalCategoria() {
+    this.modalCategoriaAberto = false;
+    this.novaCategoriaNome = '';
+  }
+
+  salvarCategoria() {
+    if (!this.novaCategoriaNome.trim()) {
+      alert('Informe o nome da categoria.');
+      return;
+    }
+    this.salvandoCategoria = true;
+
+    // Chama o service para cadastrar
+    this.categoriaService.cadastrar({ categoria: this.novaCategoriaNome.trim() }).subscribe({
+      next: (categoriaCriada) => {
+        // Recarrega as categorias para incluir a nova
+        this.categoriaService.listar().subscribe({
+          next: (cats) => {
+            this.categorias = cats;
+            // Seleciona automaticamente a nova categoria
+            this.formData.idCategoria = categoriaCriada.idcategoria;
+            this.fecharModalCategoria();
+            this.salvandoCategoria = false;
+            alert('Categoria criada com sucesso!');
+          }
+        });
+      },
+      error: (err: any) => {
+        alert('Erro ao criar categoria: ' + (err.error || err.message));
+        this.salvandoCategoria = false;
+      }
+    }); 
+  }
+  
 
   abrirModal(item?: Item) {
     if (item) {
@@ -113,11 +159,19 @@ export class AdminProdutosComponent implements OnInit {
           this.fecharModal();
           this.carregarDados();
         },
-        error: (err: any) => alert('Erro ao atualizar: ' + (err.error || err.message)) // ✅ CORRIGIDO: Adicionado ': any'
+        error: (err: any) => alert('Erro ao atualizar: ' + (err.error || err.message)) 
       });
     } else {
-      alert('Funcionalidade de cadastro pode ser adicionada aqui seguindo o mesmo padrão.');
-      this.fecharModal();
+      this.itemService.cadastrar(this.formData).subscribe({
+        next: () => {
+          alert('Item cadastrado com sucesso!');
+          this.fecharModal();
+          this.carregarDados(); // Recarrega a tabela para mostrar o novo item
+        },
+        error: (err: any) => {
+          alert('Erro ao cadastrar: ' + (err.error || err.message));
+        }
+      });
     }
   }
 
@@ -128,7 +182,7 @@ export class AdminProdutosComponent implements OnInit {
       
       this.itemService.atualizar(item.idItem, { ...item, ativo: novoStatus }).subscribe({
         next: () => this.carregarDados(),
-        error: (err: any) => alert('Erro ao alterar status: ' + (err.error || err.message)) // ✅ CORRIGIDO: Adicionado ': any'
+        error: (err: any) => alert('Erro ao alterar status: ' + (err.error || err.message)) 
       });
     }
   }

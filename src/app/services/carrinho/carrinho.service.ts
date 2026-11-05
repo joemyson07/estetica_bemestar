@@ -20,7 +20,7 @@ export class CarrinhoService {
   constructor() {}
 
   adicionarItem(item: Item, quantidade: number = 1): string | null {
-    // Validação de estoque para produtos (tipoItem === 'P')
+
     if (item.tipoItem === 'P') {
       const estoque = item.quantidadeEstoque ?? 0;
       if (quantidade > estoque) {
@@ -30,6 +30,8 @@ export class CarrinhoService {
         return 'Produto indisponível no estoque.';
       }
     }
+
+    const precoVenda = item.precoVenda || item.preco
 
     const existente = this.itens.find(i => i.item.idItem === item.idItem);
     if (existente) {
@@ -45,8 +47,8 @@ export class CarrinhoService {
       this.itens.push({
         item,
         quantidade,
-        valorUnitario: item.preco,
-        valorTotal: quantidade * item.preco
+        valorUnitario: precoVenda,
+        valorTotal: quantidade * precoVenda
       });
     }
     this.atualizarSubject();

@@ -1,126 +1,179 @@
 <div class="adm-container">
-    <header class="page-header">
-      <div>
-        <h1>Gerenciamento de Produtos e Serviços</h1>
-        <p class="subtitulo">Gerencie o catálogo da loja</p>
-      </div>
-      <button class="btn-primary" (click)="abrirModal()">+ Novo Item</button>
-    </header>
-  
-    <div *ngIf="erro" class="alerta erro">{{ erro }}</div>
-  
-    <!-- Barra de Filtros -->
-    <div class="filtros-bar" *ngIf="!carregando">
-      <div class="input-busca">
-        <input 
-          type="text" 
-          placeholder="Buscar por nome ou descrição..." 
-          [(ngModel)]="termoBusca" 
-          (ngModelChange)="aplicarFiltros()"
-        >
-      </div>
+  <header class="page-header">
+    <div>
+      <h1>Gerenciamento de Produtos e Serviços</h1>
+      <p class="subtitulo">Gerencie o catálogo da loja</p>
+    </div>
+    <button class="btn-primary" (click)="abrirModal()">+ Novo Item</button>
+  </header>
+
+  <div *ngIf="erro" class="alerta erro">{{ erro }}</div>
+
+  <!-- Barra de Filtros -->
+  <div class="filtros-bar" *ngIf="!carregando">
+    <div class="input-busca">
+      <input 
+        type="text" 
+        placeholder="Buscar por nome ou descrição..." 
+        [(ngModel)]="termoBusca" 
+        (ngModelChange)="aplicarFiltros()"
+      >
+    </div>
+    
+    <select [(ngModel)]="filtroTipo" (ngModelChange)="aplicarFiltros()">
+      <option value="Todos">Todos os tipos</option>
+      <option value="P">Produtos</option>
+      <option value="S">Serviços</option>
+    </select>
+
+    <select [(ngModel)]="filtroCategoria" (ngModelChange)="aplicarFiltros()">
+      <option [value]="0">Todas as categorias</option>
+      <option *ngFor="let cat of categorias" [value]="cat.idCategoria">
+        {{ cat.categoria }}
+      </option>
+    </select>
+  </div>
+
+  <!-- Tabela de Itens -->
+  <div class="tabela-wrapper" *ngIf="!carregando">
+    <table class="tabela-dados">
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>Categoria</th>
+          <th>Tipo</th>
+          <th>Preço</th>
+          <th>Status</th>
+          <th class="acoes-col">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of itensFiltrados">
+          <td class="col-nome">
+            <strong>{{ item.item }}</strong>
+            <small>{{ item.descricaoItem | slice:0:40 }}{{ item.descricaoItem.length > 40 ? '...' : '' }}</small>
+          </td>
+          <td>{{ item.categoria }}</td>
+          <td>
+            <span class="badge" [class.badge-produto]="item.tipoItem === 'P'" [class.badge-servico]="item.tipoItem === 'S'">
+              {{ getTipoLabel(item.tipoItem) }}
+            </span>
+          </td>
+          <td class="col-preco">{{ item.precoVenda || item.preco | currency:'BRL' }}</td>
+          <td>
+            <span class="status-indicator" [class.ativo]="item.ativo" [class.inativo]="!item.ativo">
+              {{ item.ativo ? 'Ativo' : 'Inativo' }}
+            </span>
+          </td>
+          <td class="acoes-col">
+            <button class="btn-icon btn-editar" (click)="abrirModal(item)" title="Editar">✏️</button>
+            <button class="btn-icon btn-toggle" (click)="toggleAtivo(item)" title="{{ item.ativo ? 'Inativar' : 'Ativar' }}">
+              {{ item.ativo ? '🔒' : '🔓' }}
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="itensFiltrados.length === 0">
+          <td colspan="6" class="sem-dados">Nenhum item encontrado com os filtros atuais.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Modal de Edição -->
+  <div *ngIf="modalAberto" class="modal-overlay" (click)="fecharModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <h2>{{ modoEdicao ? 'Editar Item' : 'Novo Item' }}</h2>
       
-      <select [(ngModel)]="filtroTipo" (ngModelChange)="aplicarFiltros()">
-        <option value="Todos">Todos os tipos</option>
-        <option value="P">Produtos</option>
-        <option value="S">Serviços</option>
-      </select>
-  
-      <select [(ngModel)]="filtroCategoria" (ngModelChange)="aplicarFiltros()">
-        <option [value]="0">Todas as categorias</option>
-        <option *ngFor="let cat of categorias" [value]="cat.idCategoria">
-          {{ cat.categoria }}
-        </option>
-      </select>
-    </div>
-  
-    <!-- Tabela de Itens -->
-    <div class="tabela-wrapper" *ngIf="!carregando">
-      <table class="tabela-dados">
-        <thead>
-          <tr>
-            <th>Nome</th>
-            <th>Categoria</th>
-            <th>Tipo</th>
-            <th>Preço</th>
-            <th>Status</th>
-            <th class="acoes-col">Ações</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let item of itensFiltrados">
-            <td class="col-nome">
-              <strong>{{ item.item }}</strong>
-              <small>{{ item.descricaoItem | slice:0:40 }}{{ item.descricaoItem.length > 40 ? '...' : '' }}</small>
-            </td>
-            <td>{{ item.categoria }}</td>
-            <td>
-              <span class="badge" [class.badge-produto]="item.tipoItem === 'P'" [class.badge-servico]="item.tipoItem === 'S'">
-                {{ getTipoLabel(item.tipoItem) }}
-              </span>
-            </td>
-            <td class="col-preco">{{ item.preco | currency:'BRL' }}</td>
-            <td>
-              <span class="status-indicator" [class.ativo]="item.ativo" [class.inativo]="!item.ativo">
-                {{ item.ativo ? 'Ativo' : 'Inativo' }}
-              </span>
-            </td>
-            <td class="acoes-col">
-              <button class="btn-icon btn-editar" (click)="abrirModal(item)" title="Editar">✏️</button>
-              <button class="btn-icon btn-toggle" (click)="toggleAtivo(item)" title="{{ item.ativo ? 'Inativar' : 'Ativar' }}">
-                {{ item.ativo ? '🔒' : '🔓' }}
-              </button>
-            </td>
-          </tr>
-          <tr *ngIf="itensFiltrados.length === 0">
-            <td colspan="6" class="sem-dados">Nenhum item encontrado com os filtros atuais.</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  
-    <!-- Modal de Edição -->
-    <div *ngIf="modalAberto" class="modal-overlay" (click)="fecharModal()">
-      <div class="modal-content" (click)="$event.stopPropagation()">
-        <h2>{{ modoEdicao ? 'Editar Item' : 'Novo Item' }}</h2>
-        
+      <div class="form-group">
+        <label>Tipo</label>
+        <select [(ngModel)]="formData.tipoItem">
+          <option value="P">Produto</option>
+          <option value="S">Serviço</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Nome</label>
+        <input type="text" [(ngModel)]="formData.item">
+      </div>
+
+      <div class="form-group">
+        <label>Descrição</label>
+        <textarea [(ngModel)]="formData.descricaoItem" rows="3"></textarea>
+      </div>
+
+      <div class="form-row">
         <div class="form-group">
-          <label>Tipo</label>
-          <select [(ngModel)]="formData.tipoItem">
-            <option value="P">Produto</option>
-            <option value="S">Serviço</option>
+          <label>Preço (R$)</label>
+          <input type="number" step="0.01" [(ngModel)]="formData.preco">
+        </div>
+
+        <div class="form-group" *ngIf="formData.tipoItem === 'P'">
+            <label>Margem de Lucro *</label>
+          <select [(ngModel)]="formData.codigoPreco">
+            <option [ngValue]="1">Baixa (30%)</option>
+            <option [ngValue]="2">Média (50%)</option>
+            <option [ngValue]="3">Alta (70%)</option>
           </select>
         </div>
-  
+      </div>
+
+        <div class="form-group" *ngIf="formData.tipoItem === 'P'">
+          <label>Unidade de Medida *</label>
+        <select [(ngModel)]="formData.unidade">
+          <option value="UN">Unidade (UN)</option>
+          <option value="ML">Mililitro (ML)</option>
+          <option value="G">Grama (G)</option>
+          <option value="KG">Quilograma (KG)</option>
+          <option value="L">Litro (L)</option>
+          <option value="CX">Caixa (CX)</option>
+          <option value="PCT">Pacote (PCT)</option>
+        </select>
+
         <div class="form-group">
-          <label>Nome</label>
-          <input type="text" [(ngModel)]="formData.item">
+          <label>Categoria</label>
+          <select [(ngModel)]="formData.idCategoria">
+            <option *ngFor="let cat of categorias" [value]="cat.idCategoria">
+              {{ cat.categoria }}
+            </option>
+          </select>
+          <button type="button" class="btn-add-categoria" (click)="abrirModalCategoria()" title="Nova categoria">
+    +
+  </button>
         </div>
-  
-        <div class="form-group">
-          <label>Descrição</label>
-          <textarea [(ngModel)]="formData.descricaoItem" rows="3"></textarea>
-        </div>
-  
-        <div class="form-row">
-          <div class="form-group">
-            <label>Preço (R$)</label>
-            <input type="number" step="0.01" [(ngModel)]="formData.preco">
-          </div>
-          <div class="form-group">
-            <label>Categoria</label>
-            <select [(ngModel)]="formData.idCategoria">
-              <option *ngFor="let cat of categorias" [value]="cat.idCategoria">
-                {{ cat.categoria }}
-              </option>
-            </select>
-          </div>
-        </div>
-  
-        <div class="modal-actions">
-          <button class="btn-secondary" (click)="fecharModal()">Cancelar</button>
-          <button class="btn-primary" (click)="salvarItem()">Salvar</button>
-        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-secondary" (click)="fecharModal()">Cancelar</button>
+        <button class="btn-primary" (click)="salvarItem()">Salvar</button>
       </div>
     </div>
   </div>
+
+    <!-- Mini-Modal de Nova Categoria -->
+<div *ngIf="modalCategoriaAberto" class="modal-overlay modal-overlay-mini" (click)="fecharModalCategoria()">
+  <div class="modal-content modal-content-mini" (click)="$event.stopPropagation()">
+    <h3>Nova Categoria</h3>
+    <p>Informe o nome da nova categoria:</p>
+    
+    <div class="form-group">
+      <input 
+        type="text" 
+        [(ngModel)]="novaCategoriaNome" 
+        placeholder="Ex: Cuidados com o Cabelo"
+        (keyup.enter)="salvarCategoria()"
+        autofocus
+      >
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-secondary" (click)="fecharModalCategoria()" [disabled]="salvandoCategoria">
+        Cancelar
+      </button>
+      <button class="btn-primary" (click)="salvarCategoria()" [disabled]="salvandoCategoria">
+        {{ salvandoCategoria ? 'Salvando...' : 'Criar' }}
+      </button>
+    </div>
+  </div>
+</div>
+</div>

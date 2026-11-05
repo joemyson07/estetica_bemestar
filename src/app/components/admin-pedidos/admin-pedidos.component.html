@@ -35,6 +35,7 @@
           </div>
           <div class="info-secundaria">
             <span class="cliente-info">Cliente ID: {{ pedido.idPessoa }}</span>
+            <span class="cliente-info">Nome: {{pedido.nomeCliente}}</span>
             <span class="valor-total">R$ {{ pedido.valorTotal | number:'1.2-2' }}</span>
           </div>
           <span class="status-badge" [class]="'status-badge ' + getStatusClass(pedido.status || '')">

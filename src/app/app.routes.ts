@@ -8,6 +8,8 @@ import { FuncionariosComponent } from './components/funcionarios/funcionarios.co
 import { ClientesComponent } from './components/clientes/clientes.component';
 import { AdminPedidosComponent } from './components/admin-pedidos/admin-pedidos.component';
 import { AdminProdutosComponent } from './components/admin-produtos/admin-produtos.component';
+import { AdminentradaComponent } from './components/admin-entrada/admin-entrada.component';
+import { AdminEstoqueComponent } from './components/admin-estoque/admin-estoque.component';
 
 
 export const routes: Routes = [
@@ -52,5 +54,13 @@ export const routes: Routes = [
     {
         path: 'admin-produtos',
         component: AdminProdutosComponent
+    },
+    {
+        path: 'entradas',
+        component: AdminentradaComponent
+    },
+    {
+        path: 'estoque',
+        component: AdminEstoqueComponent
     }
 ];
