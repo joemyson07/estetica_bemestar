@@ -1,0 +1,105 @@
+<div class="entradas-container">
+  <header class="page-header">
+    <div>
+      <h1>Entrada de Produtos</h1>
+      <p class="subtitulo">Registre entradas de mercadorias para atualizar o estoque</p>
+    </div>
+  </header>
+
+  <!-- Mensagens -->
+  <div *ngIf="erro" class="alerta erro">{{ erro }}</div>
+  <div *ngIf="sucesso" class="alerta sucesso">{{ sucesso }}</div>
+
+  <div class="conteudo-grid" *ngIf="!carregando">
+    
+    <!-- Formulário de Entrada -->
+    <div class="card-formulario">
+      <h2>Nova Entrada</h2>
+      
+      <form (ngSubmit)="registrarEntrada()">
+        <div class="form-group">
+          <label>Produto *</label>
+          <select [(ngModel)]="formData.idItem" name="idItem" required>
+            <option [ngValue]="0" disabled>Selecione um produto</option>
+            <option *ngFor="let p of produtos" [ngValue]="p.idItem">
+              {{ p.item }} ({{ p.categoria }})
+            </option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Data da Entrada *</label>
+          <input 
+            type="date" 
+            [(ngModel)]="formData.dataEntrada" 
+            name="dataEntrada" 
+            required
+          >
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Quantidade *</label>
+            <input 
+              type="number" 
+              [(ngModel)]="formData.quantidadeEntrada" 
+              name="quantidadeEntrada" 
+              step="1"
+              min="1" 
+              required
+              placeholder="0"
+            >
+          </div>
+
+          <div class="form-group">
+            <label>Valor Unitário (R$) *</label>
+            <input 
+              type="number" 
+              [(ngModel)]="formData.valorUnitarioEntrada" 
+              name="valorUnitarioEntrada" 
+              step="0.01" 
+              min="0.01" 
+              required
+              placeholder="0,00"
+            >
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn-secondary" (click)="limparFormulario()">
+            Limpar
+          </button>
+          <button type="submit" class="btn-primary">
+            Registrar Entrada
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Histórico de Entradas -->
+    <div class="card-historico">
+      <h2>Histórico de Entradas</h2>
+      
+      <div *ngIf="entrada.length === 0" class="sem-dados">
+        Nenhuma entrada registrada ainda.
+      </div>
+
+      <div *ngIf="entrada.length > 0" class="lista-entradas">
+        <div *ngFor="let entrada of entrada" class="entrada-card">
+          <div class="entrada-info">
+            <span class="entrada-produto">{{ getNomeProduto(entrada.idItem) }}</span>
+            <span class="entrada-data">{{ entrada.dataEntrada | date:'dd/MM/yyyy' }}</span>
+          </div>
+          <div class="entrada-valores">
+            <span class="entrada-qtd">
+              <strong>{{ entrada.quantidade }}</strong> un.
+            </span>
+            <span class="entrada-total">
+              R$ {{ (entrada.quantidade * entrada.valorUnitario) | number:'1.2-2' }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
