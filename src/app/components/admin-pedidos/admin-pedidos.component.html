@@ -1,0 +1,98 @@
+<div class="admin-pedidos-container">
+    <header class="page-header">
+      <h1>Gerenciamento de Pedidos</h1>
+      <p class="subtitulo">Acompanhe e altere o status de todos os pedidos da loja</p>
+    </header>
+  
+    <div *ngIf="erro" class="alerta erro">{{ erro }}</div>
+    <div *ngIf="carregando" class="alerta info">Carregando pedidos...</div>
+  
+    <!-- Filtro de Status -->
+    <div class="filtros-bar" *ngIf="!carregando">
+      <label for="statusFiltro">Filtrar por situação:</label>
+      <select id="statusFiltro" [(ngModel)]="statusFiltro" (ngModelChange)="aplicarFiltro()">
+        <option *ngFor="let status of statusDisponiveis" [value]="status">
+          {{ status }}
+        </option>
+      </select>
+      <span class="contador">{{ pedidosFiltrados.length }} pedido(s) encontrado(s)</span>
+    </div>
+  
+    <!-- Lista de Pedidos -->
+    <div class="lista-pedidos" *ngIf="!carregando">
+      <div *ngIf="pedidosFiltrados.length === 0" class="sem-dados">
+        Nenhum pedido encontrado com este filtro.
+      </div>
+  
+      <div *ngFor="let pedido of pedidosFiltrados" class="pedido-card" 
+           [class.selecionado]="pedidoSelecionado?.idPedido === pedido.idPedido"
+           (click)="selecionarPedido(pedido)">
+        
+        <div class="pedido-resumo">
+          <div class="info-principal">
+            <span class="pedido-id">#{{ pedido.idPedido }}</span>
+            <span class="pedido-data">{{ pedido.dataPedido | date:'dd/MM/yyyy HH:mm' }}</span>
+          </div>
+          <div class="info-secundaria">
+            <span class="cliente-info">Cliente ID: {{ pedido.idPessoa }}</span>
+            <span class="valor-total">R$ {{ pedido.valorTotal | number:'1.2-2' }}</span>
+          </div>
+          <span class="status-badge" [class]="'status-badge ' + getStatusClass(pedido.status || '')">
+            {{ pedido.status }}
+          </span>
+        </div>
+  
+        <!-- Detalhes Expandidos -->
+        <div *ngIf="pedidoSelecionado?.idPedido === pedido.idPedido" class="pedido-detalhes" (click)="$event.stopPropagation()">
+          <h4>Itens do Pedido</h4>
+          <table class="tabela-itens">
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th>Tipo</th>
+                <th>Qtd</th>
+                <th>Valor Unit.</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of pedidoSelecionado!.itens">
+                <td>{{ item.nomeItem }}</td>
+                <td>{{ item.tipoItem === 'P' ? 'Produto' : 'Serviço' }}</td>
+                <td>{{ item.quantidade }}</td>
+                <td>R$ {{ item.valorUnitario | number:'1.2-2' }}</td>
+                <td>R$ {{ item.valorTotal | number:'1.2-2' }}</td>
+              </tr>
+            </tbody>
+          </table>
+  
+          <!-- Ações de Status (RF15) -->
+          <div class="acoes-status">
+            <span>Alterar status para:</span>
+            <div class="botoes-status">
+              <button *ngIf="pedido.status !== 'Em processamento'" 
+                      class="btn-status btn-proc" 
+                      (click)="alterarStatus(pedido.idPedido!, 'Em processamento', $event)"
+                      [disabled]="processandoStatus">
+                Em processamento
+              </button>
+              
+              <button *ngIf="pedido.status === 'Em processamento'" 
+                      class="btn-status btn-conc" 
+                      (click)="alterarStatus(pedido.idPedido!, 'Concluído', $event)"
+                      [disabled]="processandoStatus">
+                Concluir
+              </button>
+              
+              <button *ngIf="pedido.status === 'Aberto' || pedido.status === 'Em processamento'" 
+                      class="btn-status btn-canc" 
+                      (click)="alterarStatus(pedido.idPedido!, 'Cancelado', $event)"
+                      [disabled]="processandoStatus">
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>

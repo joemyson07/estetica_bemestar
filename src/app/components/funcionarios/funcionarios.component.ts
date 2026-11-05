@@ -15,12 +15,9 @@ export class FuncionariosComponent implements OnInit {
   funcionarios: Funcionario[] = [];
   carregando = true;
   erro = '';
-
-  // Controle do Formulário
   formularioAberto = false;
   modoEdicao = false;
   
-  // Objeto que guarda os dados do formulário
   formData: any = {
     idPessoa: 0,
     nome: '',
@@ -57,7 +54,6 @@ export class FuncionariosComponent implements OnInit {
   abrirFormulario(funcionario?: Funcionario) {
     if (funcionario) {
       this.modoEdicao = true;
-      // Clona os dados para o formulário
       this.formData = {
         idPessoa: funcionario.idPessoa,
         nome: funcionario.nome,
@@ -91,7 +87,6 @@ export class FuncionariosComponent implements OnInit {
   }
 
   salvarFuncionario() {
-    // Limpeza básica dos dados antes de enviar
     const dadosEnvio = {
       ...this.formData,
       cpf: this.formData.cpf.replace(/\D/g, ''),

@@ -3,22 +3,17 @@
     <h1>Seu Carrinho</h1>
   </header>
 
-  <!-- Mensagens de feedback -->
-  <div *ngIf="exibirMensagem" [class]="'alerta ' + tipoMensagem">
-    {{ mensagem }}
-  </div>
-
   <!-- Estado vazio -->
-  <div *ngIf="itens.length === 0 && !exibirMensagem" class="carrinho-vazio">
+  <div *ngIf="itensCarrinho.length === 0" class="carrinho-vazio">
     <p>Seu carrinho está vazio.</p>
     <a routerLink="/home" class="btn-continuar-comprando">Voltar ao Catálogo</a>
   </div>
 
   <!-- Conteúdo do carrinho -->
-  <div *ngIf="itens.length > 0" class="carrinho-conteudo">
+  <div *ngIf="itensCarrinho.length > 0" class="carrinho-conteudo">
     
     <div class="lista-itens">
-      <div *ngFor="let itemCarrinho of itens" class="item-card">
+      <div *ngFor="let itemCarrinho of itensCarrinho" class="item-card">
         <div class="item-info">
           <h3>{{ itemCarrinho.item.item }}</h3>
           <span class="item-categoria">{{ itemCarrinho.item.categoria }}</span>
@@ -27,14 +22,14 @@
 
         <div class="item-controles">
           <div class="quantidade-wrapper">
-            <button (click)="alterarQuantidade(itemCarrinho, itemCarrinho.quantidade - 1)">-</button>
+            <button (click)="alterarQuantidade(itemCarrinho.item.idItem, itemCarrinho.quantidade - 1)">-</button>
             <span>{{ itemCarrinho.quantidade }}</span>
-            <button (click)="alterarQuantidade(itemCarrinho, itemCarrinho.quantidade + 1)">+</button>
+            <button (click)="alterarQuantidade(itemCarrinho.item.idItem, itemCarrinho.quantidade + 1)">+</button>
           </div>
           
           <div class="item-precos">
-            <span class="unitario">R$ {{ itemCarrinho.valorUnitario | number:'1.2-2' }} un.</span>
-            <span class="total-item">R$ {{ itemCarrinho.valorTotal | number:'1.2-2' }}</span>
+            <span class="unitario">R$ {{ itemCarrinho.valorUnitario.toFixed(2) }} un.</span>
+            <span class="total-item">R$ {{ itemCarrinho.valorTotal.toFixed(2) }}</span>
           </div>
 
           <button class="btn-remover" (click)="removerItem(itemCarrinho.item.idItem)" title="Remover item">
@@ -42,14 +37,32 @@
           </button>
         </div>
       </div>
+
+      <button class="btn-limpar" (click)="limparTudo()">Esvaziar Carrinho</button>
     </div>
 
     <!-- Resumo e Checkout -->
     <div class="resumo-pedido">
       <h2>Resumo do Pedido</h2>
+
+      <div *ngIf="!nomeClienteAtual" class="info-cliente nao-identificado">
+        <span>Cliente não identificado</span>
+        <button type="button" class="btn-selecionar" (click)="abrirModalIdentificacao()">
+          Selecionar Cliente
+        </button>
+      </div>
+      
+      <!-- SE JÁ TIVER CLIENTE IDENTIFICADO -->
+      <div *ngIf="nomeClienteAtual" class="info-cliente identificado">
+        <span>Olá, <strong>{{ nomeClienteAtual }}</strong></span>
+        <button type="button" class="btn-trocar" (click)="trocarCliente()">
+          Trocar
+        </button>
+      </div>
+
       <div class="linha-total">
         <span>Total a pagar:</span>
-        <span class="valor-final">R$ {{ valorTotal | number:'1.2-2' }}</span>
+        <span class="valor-final">R$ {{ valorTotal.toFixed(2) }}</span>
       </div>
       
       <button 
@@ -59,59 +72,42 @@
       >
         {{ processando ? 'Processando...' : 'Confirmar Pedido' }}
       </button>
-
-      <button class="btn-voltar" (click)="voltarCatalogo()">
-        Continuar Comprando
-      </button>
     </div>
   </div>
 
-  <!-- ============================================== -->
-  <!-- MODAL DE IDENTIFICAÇÃO DO CLIENTE              -->
-  <!-- ============================================== -->
+  <!-- Modal de Identificação -->
   <div *ngIf="mostrarModalIdentificacao" class="modal-overlay" (click)="fecharModal()">
     <div class="modal-content" (click)="$event.stopPropagation()">
       <h2>Identifique-se para finalizar</h2>
-      <p>Informe o email e CPF usados no seu cadastro para vincular este pedido a você.</p>
+      <p>Informe os dados usados no seu cadastro para vincular este pedido a você.</p>
 
-      <div *ngIf="erroIdentificacao" class="alerta erro">{{ erroIdentificacao }}</div>
+      <div *ngIf="erroIdentificacao" class="erro-modal">{{ erroIdentificacao }}</div>
 
-      <form (ngSubmit)="identificarCliente()">
-        <label for="email-modal">Email:</label>
+      <form (ngSubmit)="identificarEContinuar()">
+        <label>Email:</label>
         <input 
-          id="email-modal"
           type="email" 
           [(ngModel)]="emailIdentificacao" 
           name="email" 
           required 
           placeholder="seu@email.com"
-          [disabled]="processando"
-          autocomplete="email"
         />
 
-        <label for="cpf-modal">CPF (apenas números):</label>
+        <label>CPF (apenas números):</label>
         <input 
-          id="cpf-modal"
           type="text" 
           [(ngModel)]="cpfIdentificacao" 
           name="cpf" 
           required 
           placeholder="00000000000"
           maxlength="11"
-          [disabled]="processando"
-          autocomplete="off"
         />
 
         <div class="modal-acoes">
-          <button type="button" class="btn-secondary" (click)="fecharModal()" [disabled]="processando">
-            Cancelar
-          </button>
-          <button type="submit" class="btn-primary" [disabled]="processando">
+          <button type="button" class="btn-cancelar" (click)="fecharModal()">Cancelar</button>
+          <button type="submit" class="btn-confirmar" [disabled]="processando">
             {{ processando ? 'Verificando...' : 'Continuar' }}
           </button>
         </div>
       </form>
-
-      <p class="modal-dica">
-        Ainda não tem cadastro? 
-        <a routerLink="/cadastro" (click)="fecharModal()">Cadastre-se aqui
+    </div>

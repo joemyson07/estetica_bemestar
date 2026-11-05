@@ -31,7 +31,7 @@ export class PedidosComponent implements OnInit {
   }
 
   private carregarCliente(): void {
-    const idSalvo = localStorage.getItem('idPessoa'); // ✅ Corrigido
+    const idSalvo = localStorage.getItem('idPessoa'); 
     if (idSalvo) {
       this.idCliente = Number(idSalvo);
     }
@@ -61,7 +61,7 @@ export class PedidosComponent implements OnInit {
 
   selecionarPedido(pedido: Pedido): void {
     if (this.pedidoSelecionado?.idPedido === pedido.idPedido) {
-      this.pedidoSelecionado = null; // Fecha se já estiver aberto
+      this.pedidoSelecionado = null; 
     } else {
       this.pedidoService.consultarPedidoPorId(pedido.idPedido!).subscribe({
         next: (pedidoDetalhado) => {
@@ -72,23 +72,21 @@ export class PedidosComponent implements OnInit {
     }
   }
 
-  // ✅ NOVO: Cancelar Pedido
   cancelarPedido(id: number, event: Event): void {
-    event.stopPropagation(); // Evita que o clique abra os detalhes do pedido
+    event.stopPropagation();
     
     if (confirm('Tem certeza que deseja CANCELAR este pedido? Esta ação não pode ser desfeita.')) {
       this.pedidoService.cancelarPedido(id).subscribe({
         next: () => {
           this.exibirMensagemSucesso('Pedido cancelado com sucesso!');
           this.pedidoSelecionado = null;
-          this.carregarPedidos(); // Recarrega a lista com o status atualizado
+          this.carregarPedidos();
         },
         error: (erro) => this.exibirMensagemErro(erro)
       });
     }
   }
 
-  // ✅ NOVO: Excluir Pedido (Opcional, use apenas se o PDF exigir exclusão física)
   excluirPedido(id: number, event: Event): void {
     event.stopPropagation();
     
@@ -118,7 +116,6 @@ export class PedidosComponent implements OnInit {
     this.router.navigate(['/home']);
   }
 
-  // ✅ NOVO: Método de sucesso (para padronizar com o erro)
   exibirMensagemSucesso(msg: string): void {
     this.mensagem = msg;
     this.tipoMensagem = 'sucesso';

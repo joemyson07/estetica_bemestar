@@ -14,10 +14,11 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: 40px 24px 64px;
-  position: relative;
 }
 
-/* Header */
+/* =========================================
+   1. HEADER & ESTADO VAZIO
+   ========================================= */
 .carrinho-header h1 {
   margin: 0 0 28px;
   padding-bottom: 16px;
@@ -28,30 +29,6 @@
   color: var(--cor-texto, #171717);
 }
 
-/* Mensagens de Alerta */
-.alerta {
-  margin-bottom: 24px;
-  padding: 16px 20px;
-  border: 1px solid;
-  border-left-width: 4px;
-  border-radius: 8px;
-  line-height: 1.6;
-  overflow-wrap: anywhere;
-}
-
-.alerta.sucesso {
-  border-color: #86efac;
-  background: #f0fdf4;
-  color: #166534;
-}
-
-.alerta.erro {
-  border-color: #fca5a5;
-  background: #fef2f2;
-  color: #991b1b;
-}
-
-/* Carrinho Vazio */
 .carrinho-vazio {
   padding: 56px 24px;
   border: 1px solid var(--cor-borda, #e5e5e5);
@@ -66,25 +43,9 @@
   font-size: 16px;
 }
 
-.btn-continuar-comprando {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 48px;
-  padding: 12px 24px;
-  background: var(--cor-primaria, #b91c1c);
-  color: #ffffff;
-  text-decoration: none;
-  border-radius: 8px;
-  font-weight: 700;
-  transition: background 180ms ease;
-}
-
-.btn-continuar-comprando:hover {
-  background: var(--cor-primaria-hover, #991b1b);
-}
-
-/* Layout Principal: Grid (Lista + Resumo) */
+/* =========================================
+   2. LAYOUT PRINCIPAL (GRID)
+   ========================================= */
 .carrinho-conteudo {
   display: grid;
   grid-template-columns: 1fr 380px;
@@ -92,7 +53,9 @@
   align-items: start;
 }
 
-/* Lista de Itens (Cards) */
+/* =========================================
+   3. LISTA DE ITENS (CARDS)
+   ========================================= */
 .lista-itens {
   display: flex;
   flex-direction: column;
@@ -128,7 +91,7 @@
   overflow-wrap: anywhere;
 }
 
-/* Badges (Categoria e Tipo) */
+/* Badges */
 .item-categoria,
 .item-tipo {
   display: inline-flex;
@@ -223,6 +186,7 @@
   color: var(--cor-texto, #171717);
 }
 
+/* Botões de ação do item */
 .btn-remover {
   display: inline-flex;
   align-items: center;
@@ -244,7 +208,29 @@
   background: #fef2f2;
 }
 
-/* Resumo do Pedido (Sidebar) */
+.btn-limpar {
+  align-self: flex-start;
+  margin-top: 8px;
+  padding: 10px 16px;
+  border: 1px solid #a3a3a3;
+  border-radius: 8px;
+  background: #ffffff;
+  color: var(--cor-texto-secundario, #525252);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 180ms ease;
+}
+
+.btn-limpar:hover:not(:disabled) {
+  border-color: #b91c1c;
+  color: #b91c1c;
+  background: #fef2f2;
+}
+
+/* =========================================
+   4. RESUMO DO PEDIDO (SIDEBAR)
+   ========================================= */
 .resumo-pedido {
   position: sticky;
   top: 24px;
@@ -261,6 +247,31 @@
   color: var(--cor-texto, #171717);
   border: none;
   padding: 0;
+}
+
+/* Identificação do Cliente no Resumo */
+.info-cliente {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.info-cliente.identificado {
+  background: #f0fdf4;
+  border: 1px solid #86efac;
+  color: #166534;
+}
+
+.info-cliente.nao-identificado {
+  background: #fef2f2;
+  border: 1px solid #fca5a5;
+  color: #991b1b;
 }
 
 .linha-total {
@@ -284,12 +295,18 @@
   color: var(--cor-primaria, #b91c1c);
 }
 
-/* Botões do Resumo */
+/* =========================================
+   5. BOTÕES CONSOLIDADOS
+   ========================================= */
+.btn-continuar-comprando,
 .btn-finalizar,
-.btn-voltar {
+.btn-confirmar,
+.btn-cancelar,
+.btn-selecionar {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 8px;
   width: 100%;
   min-height: 48px;
   padding: 12px 20px;
@@ -298,39 +315,89 @@
   font: inherit;
   font-size: 15px;
   font-weight: 700;
+  line-height: 1.5;
+  text-align: center;
   cursor: pointer;
+  text-decoration: none;
   transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease;
 }
 
-.btn-finalizar {
+/* Estilo Primário (Vermelho) */
+.btn-continuar-comprando,
+.btn-finalizar,
+.btn-confirmar,
+.btn-selecionar {
   background: var(--cor-primaria, #b91c1c);
   color: #ffffff;
-  margin-bottom: 12px;
 }
 
-.btn-finalizar:hover:not(:disabled) {
+.btn-continuar-comprando:hover:not(:disabled),
+.btn-finalizar:hover:not(:disabled),
+.btn-confirmar:hover:not(:disabled),
+.btn-selecionar:hover:not(:disabled) {
   background: var(--cor-primaria-hover, #991b1b);
 }
 
-.btn-finalizar:disabled {
-  background: #d4d4d4;
+/* Estilo Secundário (Outline) */
+.btn-cancelar {
+  border-color: #a3a3a3;
+  background: #ffffff;
+  color: var(--cor-texto, #171717);
+}
+
+.btn-cancelar:hover:not(:disabled) {
+  border-color: var(--cor-texto, #171717);
+  background: #f5f5f5;
+}
+
+/* Botão Pequeno (Trocar) */
+.btn-trocar {
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  background: #ffffff;
+  border: 1px solid #166534;
+  color: #166534;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 180ms ease;
+}
+
+.btn-trocar:hover:not(:disabled) {
+  background: #166534;
+  color: #ffffff;
+}
+
+/* Estados Desabilitados */
+.btn-finalizar:disabled,
+.btn-confirmar:disabled,
+.btn-cancelar:disabled,
+.btn-selecionar:disabled,
+.btn-trocar:disabled,
+.quantidade-wrapper button:disabled {
+  border-color: #d4d4d4 !important;
+  background: #e5e5e5 !important;
+  color: #525252 !important;
   cursor: not-allowed;
 }
 
-.btn-voltar {
-  background: #ffffff;
-  color: var(--cor-texto, #171717);
-  border-color: #a3a3a3;
+/* Foco Acessível */
+.btn-continuar-comprando:focus-visible,
+.btn-finalizar:focus-visible,
+.btn-confirmar:focus-visible,
+.btn-cancelar:focus-visible,
+.btn-selecionar:focus-visible,
+.btn-trocar:focus-visible,
+.quantidade-wrapper button:focus-visible,
+.btn-remover:focus-visible,
+.btn-limpar:focus-visible {
+  outline: 3px solid var(--cor-primaria, #b91c1c);
+  outline-offset: 3px;
 }
 
-.btn-voltar:hover {
-  background: #f5f5f5;
-  border-color: var(--cor-texto, #171717);
-}
-
-/* ============================================ */
-/* MODAL DE IDENTIFICAÇÃO DO CLIENTE            */
-/* ============================================ */
+/* =========================================
+   6. MODAL DE IDENTIFICAÇÃO
+   ========================================= */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -344,12 +411,6 @@
   z-index: 1000;
   backdrop-filter: blur(4px);
   padding: 24px;
-  animation: fadeIn 200ms ease;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
 }
 
 .modal-content {
@@ -360,32 +421,33 @@
   max-width: 420px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
   border: 1px solid var(--cor-borda, #e5e5e5);
-  animation: slideUp 250ms ease;
-}
-
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 .modal-content h2 {
   margin: 0 0 8px;
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 700;
   color: var(--cor-texto, #171717);
+  border: none;
+  padding: 0;
 }
 
-.modal-content > p {
+.modal-content p {
   margin: 0 0 24px;
   color: var(--cor-texto-secundario, #525252);
   font-size: 14px;
   line-height: 1.5;
+}
+
+.erro-modal {
+  margin-bottom: 20px;
+  padding: 12px 16px;
+  border: 1px solid #fca5a5;
+  border-left-width: 4px;
+  border-radius: 8px;
+  background: #fef2f2;
+  color: #991b1b;
+  font-size: 14px;
 }
 
 .modal-content form label {
@@ -416,90 +478,15 @@
   box-shadow: 0 0 0 3px rgba(185, 28, 28, 0.15);
 }
 
-.modal-content form input:disabled {
-  background: #f5f5f5;
-  cursor: not-allowed;
-}
-
 .modal-acoes {
   display: flex;
   gap: 12px;
   margin-top: 8px;
 }
 
-.modal-acoes button {
-  flex: 1;
-  min-height: 44px;
-  padding: 12px 20px;
-  border: 1px solid transparent;
-  border-radius: 8px;
-  font: inherit;
-  font-size: 15px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease;
-}
-
-.modal-acoes .btn-primary {
-  background: var(--cor-primaria, #b91c1c);
-  color: #ffffff;
-}
-
-.modal-acoes .btn-primary:hover:not(:disabled) {
-  background: var(--cor-primaria-hover, #991b1b);
-}
-
-.modal-acoes .btn-primary:disabled {
-  background: #d4d4d4;
-  cursor: not-allowed;
-}
-
-.modal-acoes .btn-secondary {
-  background: #ffffff;
-  color: var(--cor-texto, #171717);
-  border-color: #a3a3a3;
-}
-
-.modal-acoes .btn-secondary:hover:not(:disabled) {
-  background: #f5f5f5;
-  border-color: var(--cor-texto, #171717);
-}
-
-.modal-dica {
-  margin: 20px 0 0;
-  padding-top: 16px;
-  border-top: 1px solid var(--cor-borda, #e5e5e5);
-  text-align: center;
-  font-size: 13px;
-  color: var(--cor-texto-secundario, #525252);
-}
-
-.modal-dica a {
-  color: var(--cor-primaria, #b91c1c);
-  font-weight: 600;
-  text-decoration: none;
-}
-
-.modal-dica a:hover {
-  text-decoration: underline;
-}
-
-/* ============================================ */
-/* FOCO ACESSÍVEL                               */
-/* ============================================ */
-.btn-continuar-comprando:focus-visible,
-.btn-finalizar:focus-visible,
-.btn-voltar:focus-visible,
-.btn-remover:focus-visible,
-.quantidade-wrapper button:focus-visible,
-.modal-acoes button:focus-visible {
-  outline: 3px solid var(--cor-primaria, #b91c1c);
-  outline-offset: 3px;
-}
-
-/* ============================================ */
-/* RESPONSIVIDADE                               */
-/* ============================================ */
+/* =========================================
+   7. RESPONSIVIDADE
+   ========================================= */
 @media (max-width: 900px) {
   .carrinho-conteudo {
     grid-template-columns: 1fr;
@@ -525,11 +512,6 @@
   .item-controles {
     width: 100%;
     justify-content: space-between;
-    flex-wrap: wrap;
-  }
-
-  .modal-content {
-    padding: 24px;
   }
 
   .modal-acoes {
@@ -541,13 +523,14 @@
   .item-card,
   .btn-continuar-comprando,
   .btn-finalizar,
-  .btn-voltar,
+  .btn-confirmar,
+  .btn-cancelar,
+  .btn-selecionar,
+  .btn-trocar,
   .btn-remover,
+  .btn-limpar,
   .quantidade-wrapper button,
-  .modal-acoes button,
-  .modal-overlay,
-  .modal-content {
+  .modal-content form input {
     transition: none;
-    animation: none;
   }
 }
